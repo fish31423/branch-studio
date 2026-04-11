@@ -1,0 +1,3338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Branch Studio Pro</title>
+  <style>
+    :root{
+      --bg:#f7f7f5;
+      --panel:#ffffff;
+      --text:#111111;
+      --muted:#6b6b6b;
+      --border:1px solid rgba(17,17,17,.08);
+      --line:#cfcfc9;
+      --cta:#549688;
+      --cta-hover:#467f74;
+      --shadow:0 20px 50px rgba(17,17,17,.08);
+      --shadow-soft:0 6px 18px rgba(17,17,17,.05);
+      --topbar-h:60px;
+      --ending-bg:#f1f6f4;
+      --ending-border:rgba(84,150,136,.28);
+    }
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;margin:0}
+    body{
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(180deg,#f9f9f7,#f4f4f2);
+      color:var(--text);
+      overflow:hidden;
+    }
+    button,input,textarea,select{font:inherit}
+    button{cursor:pointer;border:0}
+    input,textarea,select{
+      width:100%;border:var(--border);background:#fff;color:var(--text);border-radius:14px;padding:12px 14px;outline:none;
+      transition:border-color .2s ease, box-shadow .2s ease;
+    }
+    input:focus,textarea:focus,select:focus{border-color:rgba(84,150,136,.55);box-shadow:0 0 0 4px rgba(84,150,136,.12)}
+    textarea{min-height:120px;resize:vertical}
+    .hidden{display:none!important}
+    .app{height:100%;overflow:hidden;position:relative}
+    .page{position:absolute;inset:0;display:none}
+    .page.active{display:block}
+
+    .topbar{
+      height:var(--topbar-h);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;
+      background:rgba(255,255,255,.82);border-bottom:var(--border);backdrop-filter:blur(14px);position:relative;z-index:80;
+    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand-mark{
+      width:36px;height:36px;border-radius:14px;background:#111;color:#fff;display:grid;place-items:center;font-weight:800;box-shadow:var(--shadow-soft);flex:0 0 auto;
+    }
+    .brand-copy{min-width:0}
+    .brand-title{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .brand-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .icon-btn{
+      width:38px;height:38px;border-radius:999px;background:#fff;border:var(--border);box-shadow:var(--shadow-soft);
+      display:grid;place-items:center;color:#111;font-size:18px;font-weight:700;padding:0;flex:0 0 auto;
+    }
+    .icon-btn.cta-solid{background:var(--cta);color:#fff;border:0;box-shadow:0 12px 24px rgba(84,150,136,.22)}
+    .home-topbar{gap:12px}
+    .home-brand{flex:1 1 auto}
+    .home-actions{margin-left:auto}
+    .home-search-shell{display:none;align-items:center;gap:10px;flex:1 1 auto;min-width:0}
+    .home-search-shell input{height:42px;padding:0 14px;border-radius:16px}
+    .home-search-back{flex:0 0 auto}
+    .home-topbar.searching .home-brand,
+    .home-topbar.searching .home-actions{display:none}
+    .home-topbar.searching .home-search-shell{display:flex}
+    .svg-ico{width:18px;height:18px;display:block}
+    .text-btn{
+      min-height:40px;padding:10px 14px;border-radius:14px;background:#fff;border:var(--border);
+      box-shadow:var(--shadow-soft);color:#111;font-weight:600;white-space:nowrap;
+    }
+    .text-btn.cta{background:var(--cta);color:#fff;border:0;box-shadow:0 12px 24px rgba(84,150,136,.22)}
+    .text-btn.dark{background:#111;color:#fff;border:0}
+    .text-btn.sm{min-height:34px;padding:7px 11px;font-size:12px;border-radius:12px}
+
+    .home-wrap{height:calc(100% - var(--topbar-h));overflow:auto;padding:24px}
+    .home-shell{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+    .hero{
+      display:none;
+    }
+    .hero-title{display:none}
+    .hero-sub{display:none}
+    .search-row{display:flex;gap:12px;align-items:center;width:100%}
+    .script-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px}
+    .script-card{
+      background:rgba(255,255,255,.96);border:var(--border);border-radius:24px;box-shadow:var(--shadow-soft);
+      padding:18px;display:flex;flex-direction:column;gap:14px;min-height:190px;transition:transform .15s ease, box-shadow .15s ease;
+    }
+    .script-card-title{font-size:18px;font-weight:700;letter-spacing:-.02em;line-height:1.3;word-break:break-word}
+    .script-card-meta{font-size:13px;line-height:1.6;color:var(--muted)}
+    .script-card-actions{margin-top:auto;display:flex;gap:8px;flex-wrap:nowrap}
+.script-card-actions .text-btn{font-size:11px;padding:7px 8px;min-height:32px;flex:1 1 0;white-space:nowrap;letter-spacing:-.01em}
+    .empty-state{
+      background:rgba(255,255,255,.9);border:var(--border);border-radius:28px;padding:36px;text-align:center;color:var(--muted);box-shadow:var(--shadow);
+    }
+
+    .editor-shell{height:calc(100% - var(--topbar-h));position:relative;overflow:hidden;padding:8px}
+    .workspace{
+      height:100%;border:var(--border);border-radius:30px;background:linear-gradient(180deg,#fbfbfa,#f7f7f5);box-shadow:var(--shadow);position:relative;overflow:hidden;
+    }
+    .canvas-tools{
+      position:absolute;left:12px;top:12px;z-index:26;display:flex;flex-direction:column;gap:8px;pointer-events:auto;
+    }
+    .fab{
+      width:40px;height:40px;border-radius:999px;background:#fff;border:var(--border);box-shadow:0 12px 24px rgba(17,17,17,.08);
+      display:grid;place-items:center;color:#111;font-size:20px;font-weight:600;
+    }
+    .fab.cta{background:var(--cta);color:#fff;border:0}
+    .workspace-chips{
+      position:absolute;right:12px;top:12px;z-index:20;display:flex;justify-content:flex-end;gap:8px;pointer-events:none;
+    }
+    .chip{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.9);border:var(--border);box-shadow:var(--shadow-soft);font-size:12px;color:var(--muted)}
+    .viewport{position:absolute;inset:0;overflow:hidden;touch-action:none}
+    .world{
+      position:absolute;left:0;top:0;width:3600px;height:2600px;transform-origin:0 0;
+      background:radial-gradient(circle at 1px 1px, rgba(17,17,17,.045) 1px, transparent 1px);
+      background-size:28px 28px;
+    }
+    #edges{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:auto;z-index:1}
+    #edgeOverlay{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:5}
+    .edge-hit{stroke:rgba(0,0,0,0.001);stroke-width:22;stroke-linecap:round;fill:none;pointer-events:stroke;cursor:pointer;touch-action:none}
+    .edge-visual{fill:none;stroke:var(--line);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+    .edge-arrow{fill:#c0c0bb;pointer-events:none}
+    .edge-label{fill:#757575;font-size:12px;font-weight:500;pointer-events:none;paint-order:stroke fill;stroke:rgba(255,255,255,.96);stroke-width:5px;stroke-linejoin:round}
+
+    .node{
+      position:absolute;width:292px;background:rgba(255,255,255,.98);border:1px solid rgba(17,17,17,.08);z-index:2;
+      border-radius:22px;box-shadow:0 14px 30px rgba(17,17,17,.06),0 2px 8px rgba(17,17,17,.03);padding:16px;user-select:none;touch-action:none;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    .node.active{border-color:rgba(84,150,136,.5);box-shadow:0 18px 32px rgba(84,150,136,.14),0 3px 10px rgba(17,17,17,.04)}
+    .node.error{border-color:rgba(220,38,38,.32);box-shadow:0 14px 30px rgba(220,38,38,.07)}
+    .node.ending{background:var(--ending-bg);border-color:var(--ending-border)}
+    .node.locked{box-shadow:0 18px 34px rgba(17,17,17,.08), inset 0 0 0 1px rgba(17,17,17,.04)}
+    .node-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+    .node-badges{display:flex;flex-wrap:wrap;gap:6px}
+    .badge{font-size:11px;color:var(--muted);border:var(--border);background:#fafaf9;border-radius:999px;padding:5px 8px;font-weight:600}
+    .ending .badge{background:#fff}
+    .node-actions{display:flex;gap:6px;align-items:center;flex:0 0 auto;min-width:max-content}
+    .icon-pill{
+      width:32px;height:32px;border-radius:999px;background:#fff;border:var(--border);display:grid;place-items:center;
+      box-shadow:var(--shadow-soft);font-size:13px;color:#111;font-weight:700;padding:0;
+    }
+    .icon-pill.locked{background:#111;color:#fff;border:0}
+    .icon-pill.edit{
+      min-width:62px;width:auto;padding:0 12px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;writing-mode:horizontal-tb;word-break:keep-all;overflow:visible;
+    }
+    .node-title{font-size:16px;font-weight:700;line-height:1.35;letter-spacing:-.01em;margin-bottom:8px;word-break:break-word}
+    .node-body{
+      font-size:13px;line-height:1.55;color:var(--muted);min-height:40px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;overflow:hidden;word-break:break-word;
+    }
+    .node-footer{
+      margin-top:14px;padding-top:12px;border-top:1px dashed rgba(17,17,17,.08);display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);align-items:center;
+    }
+    .node-plus{
+      position:absolute;right:-16px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:999px;background:#fff;border:var(--border);
+      box-shadow:0 12px 24px rgba(17,17,17,.1);display:grid;place-items:center;font-size:20px;font-weight:500;z-index:30;
+    }
+
+    .anchor{
+      position:absolute;width:28px;height:28px;border-radius:999px;background:#fff;border:2px solid #111;box-shadow:0 12px 24px rgba(17,17,17,.10);touch-action:none;z-index:3;
+      transition:border-color .15s ease, background .15s ease, box-shadow .15s ease;
+    }
+    .anchor.locked{
+      border-color:var(--cta);background:rgba(84,150,136,.18);box-shadow:0 12px 24px rgba(84,150,136,.18);
+    }
+    .anchor.active{border-color:var(--cta);box-shadow:0 0 0 5px rgba(84,150,136,.12),0 10px 20px rgba(17,17,17,.08)}
+    .anchor.locked .anchor-label{
+      background:rgba(84,150,136,.12);border-color:rgba(84,150,136,.22);color:var(--cta-hover);
+    }
+    .anchor-label{
+      position:absolute;top:-26px;left:50%;transform:translateX(-50%);padding:4px 7px;border-radius:999px;background:#fff;border:var(--border);box-shadow:var(--shadow-soft);font-size:11px;color:var(--muted);white-space:nowrap;
+    }
+
+    .modal-backdrop{
+      position:fixed;inset:0;background:rgba(17,17,17,.14);backdrop-filter:blur(6px);z-index:120;display:none;align-items:center;justify-content:center;padding:14px;
+    }
+    .modal-backdrop.open{display:flex}
+    .modal{
+      width:min(620px,100%);max-height:min(84vh,760px);overflow:auto;background:rgba(255,255,255,.98);border:var(--border);
+      border-radius:26px;box-shadow:0 30px 70px rgba(17,17,17,.16);padding:18px;
+    }
+    .modal.sm{width:min(460px,100%)}
+    .modal h3{margin:0 0 12px 0;font-size:18px;letter-spacing:-.02em}
+    .modal-sub{color:var(--muted);font-size:13px;line-height:1.6;margin-bottom:14px}
+    .stack{display:flex;flex-direction:column;gap:14px}
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    .mini{font-size:12px;color:var(--muted)}
+    .field-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+    .ai-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
+    .ai-toolbar.compact{justify-content:flex-end;margin-bottom:0}
+    .ai-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+    .ai-icon-btn{
+      width:30px;height:30px;border-radius:10px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;padding:0;color:#111;
+    }
+    .ai-icon-btn .svg-ico{width:15px;height:15px}
+    .ai-icon-btn:disabled{opacity:.45;box-shadow:none}
+    .ai-status{flex:1 1 auto;min-height:18px;line-height:1.4;text-align:right}
+    .ai-status.success{color:#0b6b57}
+    .ai-status.error{color:#b42318}
+    .ai-icon-btn.active{background:rgba(84,150,136,.12);border-color:rgba(84,150,136,.38);color:var(--cta)}
+    .ai-ref-select{
+      min-width:110px;max-width:180px;height:32px;padding:6px 10px;border-radius:10px;font-size:12px;flex:0 0 auto;
+    }
+    .ai-ref-select.compact{min-width:120px;max-width:150px}
+    .ai-ref-select.hidden{display:none}
+    .ai-settings-grid textarea{min-height:110px}
+    .character-list{display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow:auto;padding-right:2px}
+    .character-card{
+      border:var(--border);border-radius:18px;background:#fff;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;
+    }
+    .character-card.compact{padding:10px 12px;gap:8px}
+    .character-card.editing{padding:12px;gap:10px}
+    .character-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .character-card-title{font-size:13px;font-weight:700;line-height:1.4}
+    .character-card-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+    .character-card-main{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+    .character-card-name-wrap{min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+    .character-card-name{font-size:15px;font-weight:700;line-height:1.35;word-break:break-word}
+    .character-card-alias{font-size:12px;line-height:1.45;color:var(--muted);font-style:italic;word-break:break-word}
+    .character-card-role{font-size:12px;line-height:1.5;color:var(--muted);white-space:nowrap;flex:0 0 auto}
+    .character-card-bio{font-size:13px;line-height:1.65;color:#444;white-space:pre-wrap;word-break:break-word}
+    .character-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .character-grid .full{grid-column:1/-1}
+    .character-card textarea{min-height:88px}
+    #modalAiProfile{width:min(860px,96vw)}
+    #modalAiProfile textarea{min-height:120px}
+    .ai-settings-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .ai-settings-grid .full{grid-column:1/-1}
+    #modalAiSettings{width:min(760px,96vw)}
+    #modalAiSettings textarea{min-height:120px}
+
+    .settings-panel{
+      position:absolute;right:14px;top:48px;width:min(360px,calc(100vw - 20px));background:rgba(255,255,255,.98);
+      border:var(--border);border-radius:24px;box-shadow:0 24px 60px rgba(17,17,17,.15);padding:14px;z-index:95;display:none;
+    }
+    .settings-panel.open{display:block}
+    .settings-list{display:flex;flex-direction:column;gap:8px}
+    .settings-item{
+      width:100%;text-align:left;min-height:44px;padding:12px 14px;border-radius:14px;background:#fff;border:var(--border);box-shadow:var(--shadow-soft);color:#111;font-weight:600;
+    }
+
+    .validation-list{display:flex;flex-direction:column;gap:10px;max-height:42vh;overflow:auto}
+    .alert{
+      border-radius:18px;padding:12px 14px;font-size:13px;line-height:1.55;border:1px solid rgba(17,17,17,.08);background:#fafaf9;color:#111;
+    }
+    .alert.error{border-color:rgba(220,38,38,.18);background:rgba(220,38,38,.045)}
+    .alert.success{border-color:rgba(84,150,136,.24);background:rgba(84,150,136,.08)}
+
+    .sheet-backdrop{
+      position:fixed;inset:0;background:rgba(17,17,17,.14);backdrop-filter:blur(5px);z-index:115;display:none;align-items:flex-end;justify-content:center;
+    }
+    .sheet-backdrop.open{display:flex}
+    .sheet{
+      width:min(760px,100%);background:rgba(255,255,255,.99);border-top-left-radius:26px;border-top-right-radius:26px;border:var(--border);
+      box-shadow:0 -20px 50px rgba(17,17,17,.12);padding:14px 14px 18px 14px;
+    }
+    .sheet-handle{width:44px;height:5px;border-radius:999px;background:#d8d8d3;margin:0 auto 14px auto}
+    .sheet-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+    .sheet-item{
+      border:var(--border);background:#fff;border-radius:18px;padding:12px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
+      box-shadow:var(--shadow-soft);text-align:center;
+    }
+    .sheet-icon{
+      width:40px;height:40px;border-radius:14px;background:#fafaf9;border:var(--border);display:grid;place-items:center;
+    }
+    .sheet-icon svg{width:20px;height:20px}
+    .sheet-label{font-size:12px;line-height:1.35;color:#111}
+    .sheet-note{margin-top:12px;font-size:12px;color:var(--muted);text-align:center}
+
+    .field-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .node-meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .title-input-row{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:center}
+    .title-icon-btn{width:40px;height:40px;border-radius:12px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center}
+    .title-icon-btn .svg-ico{width:16px;height:16px}
+    #modalNodeEdit{width:min(860px,96vw);max-height:min(74vh,620px);overflow:hidden}
+    #modalNodeEdit .stack{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.95fr);grid-template-areas:'title meta' 'text meta' 'actions actions';gap:10px;align-items:start}
+    #modalNodeEdit .row{margin-top:0}
+    #modalNodeEdit .stack > div:nth-child(1){grid-area:title}
+    #modalNodeEdit .stack > div:nth-child(2){grid-area:text}
+    #modalNodeEdit .stack > .node-meta-grid{grid-area:meta;align-content:start}
+    #modalNodeEdit .stack > div:last-child{grid-area:actions}
+    #modalNodeText{min-height:98px;height:98px;resize:none}
+    .option-adjust-list{display:flex;flex-direction:column;gap:8px}
+    .option-adjust-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .option-edit-row{display:grid;grid-template-columns:minmax(0,1fr) 28px 28px 28px 28px;gap:6px;align-items:center}
+    .mini-icon-btn{width:28px;height:28px;border-radius:10px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;padding:0}
+    .mini-icon-btn .svg-ico{width:13px;height:13px}
+    #modalOptionAdjust{width:min(760px,96vw);max-height:min(72vh,560px);overflow:hidden}
+    #modalOptionAdjust .stack{gap:10px}
+    .anchor-action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .text-editor-screen{
+      position:absolute;
+      left:0; right:0; top:var(--topbar-h); bottom:0;
+      background:#fff;
+      z-index:70;
+      display:none;
+      flex-direction:column;
+    }
+    .text-editor-screen.open{display:flex}
+    .text-editor-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:var(--border);
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(10px);
+    }
+    #textEditorNodeSwitch{
+      flex:1 1 auto;
+      min-width:0;
+      max-width:calc(100vw - 80px);
+      border-radius:14px;
+      height:42px;
+    }
+    .text-editor-main{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      padding:12px;
+      gap:10px;
+    }
+    .text-editor-title{
+      display:grid;
+      grid-template-columns:1fr 40px;
+      gap:8px;
+      align-items:center;
+      flex:0 0 auto;
+    }
+    .text-editor-body{
+      flex:1 1 auto;
+      min-height:0;
+      display:flex;
+    }
+    #textEditorBodyInput{
+      flex:1 1 auto;
+      min-height:0;
+      height:100%;
+      resize:none;
+      border-radius:18px;
+      padding:16px;
+      line-height:1.8;
+      font-size:16px;
+    }
+
+
+    @media (max-width: 860px){
+      .field-head{align-items:flex-start;flex-direction:column}
+      .ai-toolbar{width:100%;align-items:flex-start;flex-direction:column}
+      .ai-status{text-align:left}
+      .ai-settings-grid{grid-template-columns:1fr}
+      .home-wrap{padding:16px}
+      .hero{padding:22px;flex-direction:column;align-items:flex-start}
+      .hero-title{font-size:26px}
+      .home-search-shell input{height:40px}
+      .editor-shell{padding:8px}
+      .workspace{border-radius:24px}
+      .node{width:254px;padding:14px}
+      .brand-mark{width:34px;height:34px;border-radius:12px}
+      .brand-title{font-size:14px}
+      .brand-sub{font-size:11px}
+      .node-plus{right:-12px}
+      .sheet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      #modalNodeEdit{width:min(96vw,720px);max-height:min(84vh,640px)}
+      #modalNodeEdit .stack{grid-template-columns:1fr;grid-template-areas:'title' 'text' 'meta' 'actions'}
+      #modalNodeText{height:120px;min-height:120px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="page active" id="homePage">
+      <header class="topbar home-topbar" id="homeTopbar">
+        <div class="brand home-brand" id="homeBrand">
+          <div class="brand-mark">B</div>
+          <div class="brand-copy">
+            <div class="brand-title">Branch Studio</div>
+            <div class="brand-sub">剧本主页 · 本地文件管理</div>
+          </div>
+        </div>
+        <div class="home-search-shell" id="homeSearchShell">
+          <button class="icon-btn home-search-back" id="homeSearchBackBtn" title="返回">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <input id="homeSearchInput" placeholder="搜索剧本" />
+        </div>
+        <div class="top-actions home-actions" id="homeTopActions">
+          <button class="icon-btn" id="homeSearchToggleBtn" title="搜索">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2.2"/><path d="M16 16L20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="icon-btn cta-solid" id="homeNewScriptBtn" title="新建剧本">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </header>
+      <div class="home-wrap">
+        <div class="home-shell">
+          <section class="script-grid" id="scriptGrid"></section>
+          <section class="empty-state hidden" id="homeEmptyState">还没有剧本。点击右上角加号开始。</section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="editorPage">
+      <header class="topbar">
+        <div class="brand">
+          <button class="icon-btn" id="backHomeBtn" title="返回">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="brand-copy">
+            <div class="brand-title" id="editorScriptTitle">未命名剧本</div>
+            <div class="brand-sub" id="editorScriptMeta">0 节点 · 自动保存</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="textEditorBtn" title="统一编辑">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M5 7H19M5 12H19M5 17H13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="icon-btn" id="settingsBtn" title="设置">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>
+          </button>
+        </div>
+
+        <div class="settings-panel" id="settingsPanel">
+          <div class="settings-list">
+            <button class="settings-item" id="settingsValidateBtn">检测游戏线是否完整</button>
+            <button class="settings-item" id="settingsExportTxtBtn">导出故事 TXT</button>
+            <button class="settings-item" id="settingsExportGameBtn">生成HTML游戏</button>
+            <button class="settings-item" id="settingsAiApiBtn">AI API 设置</button>
+            <button class="settings-item" id="settingsAiProfileBtn">AI 设定</button>
+            <button class="settings-item" id="settingsExportProjectBtn">导出工程 JSON</button>
+            <button class="settings-item" id="settingsImportProjectBtn">导入工程 JSON</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="text-editor-screen" id="textEditorScreen">
+        <div class="text-editor-top">
+          <select id="textEditorNodeSwitch"></select>
+          <button class="icon-btn" id="textEditorCloseBtn" title="退出">
+            <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="text-editor-main">
+          <div class="text-editor-title">
+            <input id="textEditorTitleInput" placeholder="无标题" />
+            <button class="title-icon-btn" id="textEditorClearTitleBtn" title="删除标题">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="ai-toolbar">
+            <div class="ai-actions">
+              <button class="ai-icon-btn" id="textEditorAiBtn" title="AI扩写">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 3L13.8 8.2L19 10L13.8 11.8L12 17L10.2 11.8L5 10L10.2 8.2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M18 15L18.8 17.2L21 18L18.8 18.8L18 21L17.2 18.8L15 18L17.2 17.2L18 15Z" fill="currentColor"/></svg>
+              </button>
+              <button class="ai-icon-btn" id="textEditorAiRegenerateBtn" title="重新生成">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M20 11A8 8 0 0 0 6.3 5.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4V9H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13A8 8 0 0 0 17.7 18.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 20V15H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="ai-icon-btn" id="textEditorAiUndoBtn" title="撤回">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M9 7L4 12L9 17" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12H13C16.866 12 20 15.134 20 19" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>
+              </button>
+              <button class="ai-icon-btn" id="textEditorAiRefBtn" title="参考上一节点剧情">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M9 8L5 12L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12H14C16.761 12 19 9.761 19 7V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 5H19V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="ai-icon-btn" id="textEditorAiClearBtn" title="一键清空">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M5 6H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 6V4H15V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 10V17M12 10V17M16 10V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 6L8 19H16L17 6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <select class="ai-ref-select hidden" id="textEditorAiRefSelect"></select>
+            <div class="mini ai-status" id="textEditorAiStatus"></div>
+          </div>
+          <div class="text-editor-body">
+            <textarea id="textEditorBodyInput" placeholder="输入场景文字"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-shell">
+        <div class="workspace">
+          <div class="canvas-tools">
+            <button class="fab cta" id="newFreeNodeBtn" title="新建场景">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fab" id="newAnchorBtn" title="新建锚点">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2V6M12 18V22M2 12H6M18 12H22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fab" id="undoBtn" title="撤回">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M9 8L5 12L9 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12H13C16.866 12 20 15.134 20 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fab" id="zoomOutBtn" title="缩小">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fab" id="zoomInBtn" title="放大">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="fab" id="focusStartBtn" title="定位起点">
+              <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 4L19 9V19H5V9L12 4Z" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/><path d="M9.5 14.5H14.5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+
+          <div class="workspace-chips">
+            <div class="chip" id="graphStats">0 节点 · 0 结局 · 0 锚点</div>
+          </div>
+
+          <div class="viewport" id="viewport">
+            <div class="world" id="world">
+              <svg id="edges"></svg>
+              <svg id="edgeOverlay"></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+      <input id="fileInput" type="file" accept=".json,application/json" class="hidden" />
+    </section>
+
+    <div class="modal-backdrop" id="modalBackdrop">
+      
+      <div class="modal hidden" id="modalNodeEdit">
+                <div class="stack">
+          <div>
+            <div class="field-label">标题</div>
+            <div class="title-input-row">
+              <input id="modalNodeTitle" placeholder="节点标题（可留空）" />
+              <button class="title-icon-btn" id="modalClearTitle" title="删除标题">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+          <div>
+            <div class="field-head">
+              <div class="field-label">场景文本</div>
+              <div class="ai-toolbar compact">
+                <div class="ai-actions">
+                  <button class="ai-icon-btn" id="modalAiBtn" title="AI扩写">
+                    <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 3L13.8 8.2L19 10L13.8 11.8L12 17L10.2 11.8L5 10L10.2 8.2L12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M18 15L18.8 17.2L21 18L18.8 18.8L18 21L17.2 18.8L15 18L17.2 17.2L18 15Z" fill="currentColor"/></svg>
+                  </button>
+                  <button class="ai-icon-btn" id="modalAiRegenerateBtn" title="重新生成">
+                    <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M20 11A8 8 0 0 0 6.3 5.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 4V9H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13A8 8 0 0 0 17.7 18.7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 20V15H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <button class="ai-icon-btn" id="modalAiUndoBtn" title="撤回">
+                    <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M9 7L4 12L9 17" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 12H13C16.866 12 20 15.134 20 19" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg>
+                  </button>
+                  <button class="ai-icon-btn" id="modalAiRefBtn" title="参考上一节点剧情">
+                    <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M9 8L5 12L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12H14C16.761 12 19 9.761 19 7V5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 5H19V9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </button>
+                  <button class="ai-icon-btn" id="modalAiClearBtn" title="一键清空">
+                    <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M5 6H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 6V4H15V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 10V17M12 10V17M16 10V17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 6L8 19H16L17 6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                  </button>
+                </div>
+                <select class="ai-ref-select compact hidden" id="modalAiRefSelect"></select>
+              </div>
+            </div>
+            <textarea id="modalNodeText" placeholder="输入场景文字"></textarea>
+            <div class="field-head" style="margin-top:6px;margin-bottom:0;">
+              <div class="mini" id="modalTextCount">字数：0</div>
+              <div class="mini ai-status" id="modalAiStatus"></div>
+            </div>
+          </div>
+          <div class="node-meta-grid">
+            <div><div class="field-label">类型</div><select id="modalNodeKind"><option value="scene">普通场景</option><option value="ending">结局</option></select></div>
+            <div><div class="field-label">编号</div><input id="modalNodeId" disabled /></div>
+            <div><div class="field-label">X</div><input id="modalPosX" type="number" placeholder="X" /></div>
+            <div><div class="field-label">Y</div><input id="modalPosY" type="number" placeholder="Y" /></div>
+          </div>
+          <div class="stack hidden" id="modalOptionsEditorBlock">
+            <div class="field-label">后续选项</div>
+            <div id="modalOptionsEditor"></div>
+          </div>
+          <div class="row">
+            <button class="text-btn" id="modalNodeCancel">取消</button>
+            <button class="text-btn cta" id="modalNodeSave">保存</button>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal hidden" id="modalOptionAdjust">
+        <h3>调整选项</h3>
+        <div class="modal-sub">在这里统一新增、排序、断开或删除选项，再按需连接到已有节点。</div>
+        <div class="stack">
+          <div class="option-adjust-head">
+            <div class="mini" id="optionAdjustMeta">0 个选项</div>
+            <button class="text-btn cta sm" id="optionAdjustAddBtn">新增选项</button>
+          </div>
+          <div class="option-adjust-list" id="optionAdjustList"></div>
+          <div class="row">
+            <button class="text-btn" id="optionAdjustClose">关闭</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal sm hidden" id="modalConnectExisting">
+        <h3>连接到已有节点</h3>
+        <div class="modal-sub">为当前节点或当前分支选择一个已存在的目标节点。</div>
+        <div class="stack">
+          <div id="connectOptionWrap" class="hidden">
+            <div class="field-label">待连接选项</div>
+            <select id="connectOptionSelect"></select>
+          </div>
+          <select id="connectExistingSelect"></select>
+          <div class="row">
+            <button class="text-btn" id="connectExistingCancel">取消</button>
+            <button class="text-btn cta" id="connectExistingConfirm">连接</button>
+          </div>
+        </div>
+      </div>
+
+      
+      <div class="modal sm hidden" id="modalAnchorEdit">
+        <h3>编辑锚点</h3>
+        <div class="modal-sub">填写左侧来源与右侧去向。来源和去向都可以是场景编号或锚点编号。</div>
+        <div class="stack">
+          <input id="anchorIdView" disabled />
+          <div class="row">
+            <div>
+              <div class="field-label">左侧编号</div>
+              <input id="anchorPrevInput" placeholder="左侧编号" />
+            </div>
+            <div>
+              <div class="field-label">右侧编号</div>
+              <input id="anchorNextInput" placeholder="右侧编号" />
+            </div>
+          </div>
+          <div class="mini">例如：左侧填 3，右侧填 A2，则表示从 3 通往 A2 的导线必须经过当前锚点。</div>
+          <div class="anchor-action-grid">
+            <button class="text-btn" id="anchorToggleLockBtn">固定锚点</button>
+            <button class="text-btn" id="anchorDeleteBtn">删除锚点</button>
+            <button class="text-btn" id="anchorEditCancel">取消</button>
+            <button class="text-btn cta" id="anchorEditSave">保存</button>
+          </div>
+        </div>
+      </div>
+
+
+      
+      <div class="modal hidden" id="modalAiSettings">
+        <h3>AI API 设置</h3>
+        <div class="modal-sub">可选择 DeepSeek、OpenAI、Gemini、硅基流动，并保存 API Key、Base URL 与模型名称。测试连接会直接从当前页面发起请求，请确认你的浏览器允许访问目标接口。</div>
+        <div class="stack">
+          <div class="ai-settings-grid">
+            <div>
+              <div class="field-label">模型提供方</div>
+              <select id="aiProviderSelect">
+                <option value="deepseek">DeepSeek</option>
+                <option value="openai">OpenAI</option>
+                <option value="gemini">Gemini</option>
+                <option value="siliconflow">硅基流动</option>
+              </select>
+            </div>
+            <div>
+              <div class="field-label">模型名称</div>
+              <input id="aiModelNameInput" placeholder="例如：deepseek-chat" />
+            </div>
+            <div class="full">
+              <div class="field-label">API Key</div>
+              <input id="aiApiKeyInput" type="password" placeholder="输入 API Key" />
+            </div>
+            <div class="full">
+              <div class="field-label">Base URL</div>
+              <input id="aiBaseUrlInput" placeholder="输入 Base URL" />
+            </div>
+          </div>
+          <div class="mini ai-status" id="aiSettingsTestStatus" style="text-align:left;"></div>
+          <div class="row">
+            <button class="text-btn" id="aiSettingsCloseBtn">关闭</button>
+            <button class="text-btn" id="aiSettingsTestBtn">测试连接</button>
+            <button class="text-btn cta" id="aiSettingsSaveBtn">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal hidden" id="modalAiProfile">
+        <h3>AI 设定</h3>
+        <div class="stack">
+          <div>
+            <div class="field-label">文风设定</div>
+            <textarea id="aiStyleInput" placeholder="例如：冷静克制、偏电影镜头感、句子简洁、保留一点悬疑氛围。"></textarea>
+          </div>
+          <div class="option-adjust-head">
+            <div class="field-label" style="margin:0;">人设卡片</div>
+            <button class="text-btn sm" id="aiAddCharacterBtn">新增人设</button>
+          </div>
+          <div class="character-list" id="aiCharacterList"></div>
+          <div class="mini ai-status" id="aiProfileStatus" style="text-align:left;"></div>
+          <div class="row">
+            <button class="text-btn" id="aiProfileCloseBtn">关闭</button>
+            <button class="text-btn cta" id="aiProfileSaveBtn">保存</button>
+          </div>
+        </div>
+      </div>
+
+<div class="modal sm hidden" id="modalValidation">
+        <h3>结构校验</h3>
+        <div class="modal-sub">检查断线、不可达节点、无法到结局、循环连接等问题。</div>
+        <div class="validation-list" id="modalValidationList"></div>
+        <div class="row" style="margin-top:14px;">
+          <button class="text-btn" id="modalValidationClose">关闭</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet-backdrop" id="sheetBackdrop">
+      <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-grid" id="sheetGrid"></div>
+        <div class="sheet-note" id="sheetNote">选择一个操作</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'branch-studio-v6';
+    const AI_SETTINGS_KEY = 'branch-studio-ai-settings-v1';
+    const AI_PROVIDER_DEFAULTS = {
+      deepseek: {label:'DeepSeek', baseUrl:'https://api.deepseek.com/v1', modelName:'deepseek-chat'},
+      openai: {label:'OpenAI', baseUrl:'https://api.openai.com/v1', modelName:'gpt-4.1-mini'},
+      gemini: {label:'Gemini', baseUrl:'https://generativelanguage.googleapis.com/v1beta', modelName:'gemini-1.5-flash'},
+      siliconflow: {label:'硅基流动', baseUrl:'https://api.siliconflow.cn/v1', modelName:'Qwen/Qwen2.5-7B-Instruct'}
+    };
+    const state = {
+      library: { scripts: [], activeScriptId: null },
+      currentPage: 'home',
+      selectedNodeId: null,
+      selectedAnchorId: null,
+      search: '',
+      homeSearchOpen: false,
+      pendingOptionNodeId: null,
+      validation: null,
+      view: {x: 80, y: 140, scale: 0.78},
+      pointerCache: new Map(),
+      gesture: null,
+      activeModal: null,
+      pendingConnect: null,
+      edgeLongPressTimer: null,
+      aiSettings: null,
+      aiDrafts: {},
+      aiRefPrefs: {modal:{enabled:false, source:'all'}, text:{enabled:false, source:'all'}},
+      history: []
+    };
+
+    state.aiSettings = loadAiSettings();
+
+    const ICONS = {
+      scene:'<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 14L11 11L14 14L16 12L20 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      next:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 12H17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M12 7L17 12L12 17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      option:'<svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="7" r="2" fill="currentColor"/><circle cx="7" cy="17" r="2" fill="currentColor"/><path d="M11 7H19M11 17H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
+      ending:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 6H18V9C18 12 15.5 14 12 14C8.5 14 6 12 6 9V6Z" stroke="currentColor" stroke-width="2"/><path d="M12 14V19M9 19H15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      link:'<svg viewBox="0 0 24 24" fill="none"><path d="M10 14L14 10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M7 14A4 4 0 0 1 7 8L9 6A4 4 0 1 1 15 12L14 13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M17 10A4 4 0 0 1 17 16L15 18A4 4 0 1 1 9 12L10 11" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>'
+    };
+
+    const homePage = document.getElementById('homePage');
+    const editorPage = document.getElementById('editorPage');
+    const world = document.getElementById('world');
+    const edges = document.getElementById('edges');
+    const edgeOverlay = document.getElementById('edgeOverlay');
+    const viewport = document.getElementById('viewport');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const modalBackdrop = document.getElementById('modalBackdrop');
+    const sheetBackdrop = document.getElementById('sheetBackdrop');
+
+    function now(){ return Date.now(); }
+    function deepCopy(v){ return JSON.parse(JSON.stringify(v)); }
+    function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+    function sanitizeFilename(name){ return String(name).replace(/[\\\\/:*?"<>|]/g,'_').trim() || 'export'; }
+    function fmtTime(ts){
+      const d = new Date(ts);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    function escapeHtml(str=''){
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+    function refIsAnchor(ref){ return String(ref).startsWith('A'); }
+
+    function defaultAiSettings(){
+      return {
+        provider: 'deepseek',
+        apiKey: '',
+        baseUrl: AI_PROVIDER_DEFAULTS.deepseek.baseUrl,
+        modelName: AI_PROVIDER_DEFAULTS.deepseek.modelName,
+        styleText: '',
+        characters: []
+      };
+    }
+
+    function normalizeCharacterCard(raw={}, index=0){
+      return {
+        id: String(raw.id || `char_${index}_${Math.random().toString(36).slice(2,8)}`),
+        name: String(raw.name || '').trim(),
+        role: String(raw.role || '').trim(),
+        bio: String(raw.bio || '').trim(),
+        aliases: String(raw.aliases || '').trim(),
+        editing: !!raw.editing
+      };
+    }
+
+    function loadAiSettings(){
+      const fallback = defaultAiSettings();
+      try{
+        const raw = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || 'null');
+        if(!raw || typeof raw !== 'object') return fallback;
+        const provider = AI_PROVIDER_DEFAULTS[raw.provider] ? raw.provider : fallback.provider;
+        return {
+          provider,
+          apiKey: String(raw.apiKey || ''),
+          baseUrl: String(raw.baseUrl || AI_PROVIDER_DEFAULTS[provider].baseUrl || ''),
+          modelName: String(raw.modelName || AI_PROVIDER_DEFAULTS[provider].modelName || ''),
+          styleText: String(raw.styleText || ''),
+          characters: Array.isArray(raw.characters) ? raw.characters.map(normalizeCharacterCard).filter(card => card.name || card.role || card.bio || card.aliases) : []
+        };
+      }catch(e){
+        return fallback;
+      }
+    }
+
+    function saveAiSettings(){
+      const cfg = state.aiSettings || defaultAiSettings();
+      const safeConfig = {
+        provider: cfg.provider || 'deepseek',
+        apiKey: String(cfg.apiKey || ''),
+        baseUrl: String(cfg.baseUrl || ''),
+        modelName: String(cfg.modelName || ''),
+        styleText: String(cfg.styleText || ''),
+        characters: (cfg.characters || []).map((card, idx) => {
+          const normalized = normalizeCharacterCard(card, idx);
+          return {
+            id: normalized.id,
+            name: normalized.name,
+            role: normalized.role,
+            bio: normalized.bio,
+            aliases: normalized.aliases
+          };
+        })
+      };
+      localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(safeConfig));
+    }
+
+    function getAiSettingsFormEls(){
+      return {
+        provider: document.getElementById('aiProviderSelect'),
+        apiKey: document.getElementById('aiApiKeyInput'),
+        baseUrl: document.getElementById('aiBaseUrlInput'),
+        modelName: document.getElementById('aiModelNameInput'),
+        status: document.getElementById('aiSettingsTestStatus')
+      };
+    }
+
+    function getAiProfileFormEls(){
+      return {
+        styleText: document.getElementById('aiStyleInput'),
+        list: document.getElementById('aiCharacterList'),
+        status: document.getElementById('aiProfileStatus')
+      };
+    }
+
+    function setAiStatus(el, text='', tone=''){
+      if(!el) return;
+      el.textContent = text;
+      el.className = 'mini ai-status' + (tone ? ` ${tone}` : '');
+    }
+
+    function syncAiSettingsForm(){
+      const els = getAiSettingsFormEls();
+      const cfg = state.aiSettings || defaultAiSettings();
+      els.provider.value = cfg.provider;
+      els.apiKey.value = cfg.apiKey || '';
+      els.baseUrl.value = cfg.baseUrl || '';
+      els.modelName.value = cfg.modelName || '';
+      setAiStatus(els.status, '');
+    }
+
+    function readAiSettingsForm(){
+      const els = getAiSettingsFormEls();
+      const provider = AI_PROVIDER_DEFAULTS[els.provider.value] ? els.provider.value : 'deepseek';
+      return {
+        ...(state.aiSettings || defaultAiSettings()),
+        provider,
+        apiKey: String(els.apiKey.value || '').trim(),
+        baseUrl: String(els.baseUrl.value || '').trim(),
+        modelName: String(els.modelName.value || '').trim()
+      };
+    }
+
+    function readAiCharacterCardEl(item, index=0){
+      const editing = item?.dataset?.mode === 'editing';
+      return normalizeCharacterCard({
+        id: item?.dataset?.charId || '',
+        name: editing ? (item.querySelector('[data-char-name]')?.value || '') : (item?.dataset?.name || ''),
+        role: editing ? (item.querySelector('[data-char-role]')?.value || '') : (item?.dataset?.role || ''),
+        aliases: editing ? (item.querySelector('[data-char-aliases]')?.value || '') : (item?.dataset?.aliases || ''),
+        bio: editing ? (item.querySelector('[data-char-bio]')?.value || '') : (item?.dataset?.bio || ''),
+        editing
+      }, index);
+    }
+
+    function syncAiCharactersFromDom(){
+      const list = document.getElementById('aiCharacterList');
+      if(!list) return;
+      const items = [...list.querySelectorAll('.character-card')];
+      state.aiSettings.characters = items.map((item, idx) => readAiCharacterCardEl(item, idx)).filter(card => card.name || card.role || card.bio || card.aliases);
+    }
+
+    function renderAiCharacterList(){
+      const els = getAiProfileFormEls();
+      const list = els.list;
+      if(!list) return;
+      const cards = (state.aiSettings?.characters || []).slice();
+      list.innerHTML = '';
+      cards.forEach((card, idx) => {
+        const item = document.createElement('div');
+        item.className = 'character-card ' + (card.editing ? 'editing' : 'compact');
+        item.dataset.charId = card.id;
+        item.dataset.name = card.name || '';
+        item.dataset.role = card.role || '';
+        item.dataset.aliases = card.aliases || '';
+        item.dataset.bio = card.bio || '';
+        item.dataset.mode = card.editing ? 'editing' : 'view';
+
+        const titleText = card.name || '未命名角色';
+        if(card.editing){
+          item.innerHTML = `
+            <div class="character-card-head">
+              <div class="character-card-title">${escapeHtml(titleText)}</div>
+              <div class="character-card-actions">
+                <button class="text-btn sm" type="button" data-char-save="${card.id}">保存</button>
+                <button class="mini-icon-btn" type="button" data-char-del="${card.id}" title="删除">
+                  <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+            </div>
+            <div class="character-grid">
+              <div>
+                <div class="field-label">姓名</div>
+                <input data-char-name value="${escapeHtml(card.name || '')}" placeholder="姓名" />
+              </div>
+              <div>
+                <div class="field-label">角色</div>
+                <input data-char-role value="${escapeHtml(card.role || '')}" placeholder="角色" />
+              </div>
+              <div class="full">
+                <div class="field-label">别名</div>
+                <input data-char-aliases value="${escapeHtml(card.aliases || '')}" placeholder="多个别名用逗号分开" />
+              </div>
+              <div class="full">
+                <div class="field-label">人物简介</div>
+                <textarea data-char-bio placeholder="人物简介">${escapeHtml(card.bio || '')}</textarea>
+              </div>
+            </div>
+          `;
+        } else {
+          item.innerHTML = `
+            <div class="character-card-main">
+              <div class="character-card-name-wrap">
+                <div class="character-card-name">${escapeHtml(card.name || '未命名角色')}</div>
+                ${card.aliases ? `<div class="character-card-alias">${escapeHtml(card.aliases)}</div>` : ''}
+              </div>
+              ${card.role ? `<div class="character-card-role">${escapeHtml(card.role)}</div>` : ''}
+            </div>
+            ${card.bio ? `<div class="character-card-bio">${escapeHtml(card.bio)}</div>` : ''}
+            <div class="character-card-actions">
+              <button class="text-btn sm" type="button" data-char-edit="${card.id}">编辑</button>
+              <button class="mini-icon-btn" type="button" data-char-del="${card.id}" title="删除">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          `;
+        }
+        list.appendChild(item);
+      });
+
+      list.querySelectorAll('[data-char-save]').forEach(btn => btn.addEventListener('click', () => {
+        const item = btn.closest('.character-card');
+        if(!item) return;
+        const nextCard = readAiCharacterCardEl(item);
+        nextCard.editing = false;
+        state.aiSettings.characters = (state.aiSettings.characters || []).map(card => card.id === nextCard.id ? nextCard : card);
+        renderAiCharacterList();
+      }));
+
+      list.querySelectorAll('[data-char-edit]').forEach(btn => btn.addEventListener('click', () => {
+        syncAiCharactersFromDom();
+        state.aiSettings.characters = (state.aiSettings.characters || []).map(card => ({
+          ...card,
+          editing: card.id === btn.dataset.charEdit ? true : !!card.editing
+        }));
+        renderAiCharacterList();
+      }));
+
+      list.querySelectorAll('[data-char-del]').forEach(btn => btn.addEventListener('click', () => {
+        state.aiSettings.characters = (state.aiSettings.characters || []).filter(card => card.id !== btn.dataset.charDel);
+        renderAiCharacterList();
+      }));
+    }
+
+    function addAiCharacterCard(){
+      syncAiCharactersFromDom();
+      const cfg = state.aiSettings || defaultAiSettings();
+      cfg.characters = cfg.characters || [];
+      cfg.characters.push(normalizeCharacterCard({editing:true}));
+      state.aiSettings = cfg;
+      renderAiCharacterList();
+      setAiStatus(document.getElementById('aiProfileStatus'), '');
+    }
+
+    function syncAiProfileForm(){
+      const els = getAiProfileFormEls();
+      const cfg = state.aiSettings || defaultAiSettings();
+      els.styleText.value = cfg.styleText || '';
+      renderAiCharacterList();
+      setAiStatus(els.status, '');
+    }
+
+    function readAiProfileForm(){
+      const els = getAiProfileFormEls();
+      const items = [...els.list.querySelectorAll('.character-card')];
+      const characters = items.map((item, idx) => {
+        const card = readAiCharacterCardEl(item, idx);
+        card.editing = false;
+        return card;
+      }).filter(card => card.name || card.role || card.bio || card.aliases);
+      return {
+        ...(state.aiSettings || defaultAiSettings()),
+        styleText: String(els.styleText.value || '').trim(),
+        characters
+      };
+    }
+
+    function maybeApplyAiProviderDefaults(provider){
+      const els = getAiSettingsFormEls();
+      const currentBase = String(els.baseUrl.value || '').trim();
+      const currentModel = String(els.modelName.value || '').trim();
+      const knownBases = Object.values(AI_PROVIDER_DEFAULTS).map(item => item.baseUrl);
+      const knownModels = Object.values(AI_PROVIDER_DEFAULTS).map(item => item.modelName);
+      const next = AI_PROVIDER_DEFAULTS[provider] || AI_PROVIDER_DEFAULTS.deepseek;
+      if(!currentBase || knownBases.includes(currentBase)) els.baseUrl.value = next.baseUrl;
+      if(!currentModel || knownModels.includes(currentModel)) els.modelName.value = next.modelName;
+    }
+
+    function openAiSettingsModal(){
+      syncAiSettingsForm();
+      openModal('modalAiSettings');
+    }
+
+    function openAiProfileModal(){
+      syncAiProfileForm();
+      openModal('modalAiProfile');
+    }
+
+    function normalizeAiBaseUrl(baseUrl){
+      return String(baseUrl || '').trim().replace(/\/+$/,'');
+    }
+
+    function buildAiEndpoint(config){
+      const base = normalizeAiBaseUrl(config.baseUrl);
+      if(config.provider === 'gemini'){
+        if(/:generateContent(?:\?|$)/.test(base)){
+          return base.includes('?key=') ? base : `${base}?key=${encodeURIComponent(config.apiKey)}`;
+        }
+        if(/\/models\/[^/]+$/.test(base)){
+          return `${base}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+        }
+        return `${base}/models/${encodeURIComponent(config.modelName)}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
+      }
+      return /\/chat\/completions$/.test(base) ? base : `${base}/chat/completions`;
+    }
+
+    function collectMatchedCharacterCards(baseText){
+      const cfg = state.aiSettings || defaultAiSettings();
+      const text = String(baseText || '');
+      const cards = Array.isArray(cfg.characters) ? cfg.characters : [];
+      return cards.filter(card => {
+        const tokens = [card.name].concat(String(card.aliases || '').split(/[，,]/)).map(item => String(item || '').trim()).filter(Boolean);
+        return tokens.some(token => text.includes(token));
+      });
+    }
+
+    function buildAiMessages(baseText, context={}){
+      const styleText = String(context.styleText || '').trim();
+      const prevRefs = Array.isArray(context.prevRefs) ? context.prevRefs : [];
+      const characterRefs = Array.isArray(context.characterRefs) ? context.characterRefs : [];
+      const prompt = [
+        '请把下面这段互动剧情节点草稿扩写成一段可直接放入卡片正文的中文叙述。',
+        '核心原则：始终以“当前草稿”为绝对核心，只做润色、补足、细化，不要偏离当前草稿情节。',
+        '要求：',
+        '1. 不要补充无关设定，不要擅自引入新剧情目标。',
+        '2. 可以增强画面感、动作、心理、环境细节，但保持原意和叙事焦点。',
+        '3. 若草稿里包含括号备注，例如（大约50字）、（大约200字）、（压抑一点）等，请严格参考。',
+        '4. 若没有字数备注，请根据草稿长度扩写到大约50到200字。',
+        '5. 输出只要最终正文，不要解释，不要标题，不要列表，不要引号。',
+        styleText ? `6. 文风只做轻量参考：${styleText}` : '6. 文风未单独指定，请根据情节自然润色。',
+      ];
+      if(prevRefs.length){
+        prompt.push('7. 以下“上一节点剧情”只用于帮助承接上下文，是非常有限的参考，不能喧宾夺主，更不能替代当前草稿。');
+      }
+      if(characterRefs.length){
+        prompt.push('8. 以下“人设卡”只用于避免人物行为、口吻、反应明显 OOC，不要直接引用这些设定文本。');
+      }
+      prompt.push('', '当前草稿：', baseText);
+      if(prevRefs.length){
+        prompt.push('', '有限参考的上一节点剧情：');
+        prevRefs.forEach(item => {
+          prompt.push(`- ${item.label}：${item.text || '（无正文）'}`);
+        });
+      }
+      if(characterRefs.length){
+        prompt.push('', '有限参考的人设卡：');
+        characterRefs.forEach(card => {
+          const chunks = [
+            `姓名：${card.name || '未命名'}`,
+            card.role ? `角色：${card.role}` : '',
+            card.aliases ? `别名：${card.aliases}` : '',
+            card.bio ? `简介：${card.bio}` : ''
+          ].filter(Boolean);
+          prompt.push(`- ${chunks.join('；')}`);
+        });
+      }
+      return {
+        system: '你是一个分支剧情写作助手。你必须始终以当前草稿为核心，只把额外设定当作非常有限的参考，避免人物行为与既有人设明显不符，并且只输出最终正文。',
+        user: prompt.join('\\n')
+      };
+    }
+
+    function cleanupAiText(text){
+      return String(text || '')
+        .replace(/^```[\w-]*\s*/,'')
+        .replace(/```$/,'')
+        .trim();
+    }
+
+    function extractAiText(payload, provider){
+      if(provider === 'gemini'){
+        return cleanupAiText(((payload.candidates || []).map(candidate => {
+          const parts = ((candidate.content || {}).parts || []);
+          return parts.map(part => part.text || '').join('');
+        }).join('\n')));
+      }
+      let content = (((payload.choices || [])[0] || {}).message || {}).content;
+      if(Array.isArray(content)){
+        content = content.map(part => {
+          if(typeof part === 'string') return part;
+          return part?.text || part?.content || '';
+        }).join('');
+      }
+      return cleanupAiText(content || '');
+    }
+
+    async function fetchWithTimeout(url, options={}, timeoutMs=30000){
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try{
+        const response = await fetch(url, {...options, signal: controller.signal});
+        return response;
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+
+    async function requestAiText(config, baseText, contextOrTest=false, maybeTest=false){
+      const testOnly = typeof contextOrTest === 'boolean' ? contextOrTest : !!maybeTest;
+      const context = typeof contextOrTest === 'object' && contextOrTest !== null ? contextOrTest : {};
+      if(!config || !config.apiKey || !config.baseUrl || !config.modelName){
+        throw new Error('请先完整填写 API Key、Base URL 和模型名称。');
+      }
+      const endpoint = buildAiEndpoint(config);
+      const prompts = buildAiMessages(baseText || '请回复 OK。', {
+        ...context,
+        styleText: context.styleText || config.styleText || ''
+      });
+      let response;
+      let payload;
+      let rawText = '';
+      if(config.provider === 'gemini'){
+        const geminiPrompt = testOnly ? '只回复 OK。' : `${prompts.system}
+
+${prompts.user}`;
+        response = await fetchWithTimeout(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            contents: [{parts: [{text: geminiPrompt}]}],
+            generationConfig: testOnly ? {temperature:0, maxOutputTokens:8} : {temperature:0.8, maxOutputTokens:360}
+          })
+        });
+      } else {
+        response = await fetchWithTimeout(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type':'application/json',
+            'Authorization': `Bearer ${config.apiKey}`
+          },
+          body: JSON.stringify({
+            model: config.modelName,
+            messages: testOnly ? [
+              {role:'system', content:'You are a helpful assistant.'},
+              {role:'user', content:'Reply with OK only.'}
+            ] : [
+              {role:'system', content: prompts.system},
+              {role:'user', content: prompts.user}
+            ],
+            temperature: testOnly ? 0 : 0.85,
+            max_tokens: testOnly ? 8 : 360
+          })
+        });
+      }
+      try{
+        payload = await response.json();
+      }catch(err){
+        rawText = await response.text();
+      }
+      if(!response.ok){
+        const msg = payload?.error?.message || payload?.message || rawText || `HTTP ${response.status}`;
+        throw new Error(msg);
+      }
+      const out = extractAiText(payload || {}, config.provider);
+      if(!out && !testOnly) throw new Error('接口返回成功，但没有拿到可用文本。');
+      return out || 'OK';
+    }
+
+    function getAiEditorContext(scope){
+      if(scope === 'modal'){
+        const node = getSelectedNode();
+        const input = document.getElementById('modalNodeText');
+        const statusEl = document.getElementById('modalAiStatus');
+        return node && input ? {
+          scope,
+          nodeId: node.id,
+          input,
+          statusEl,
+          setText(value){
+            input.value = value;
+            document.getElementById('modalTextCount').textContent = `字数：${value.length}`;
+          },
+          getText(){ return input.value || ''; }
+        } : null;
+      }
+      const sel = document.getElementById('textEditorNodeSwitch');
+      const nodeId = sel?.value || state.selectedNodeId;
+      const script = getActiveScript();
+      const node = script?.nodes?.[nodeId];
+      const input = document.getElementById('textEditorBodyInput');
+      const statusEl = document.getElementById('textEditorAiStatus');
+      return node && input ? {
+        scope,
+        nodeId: node.id,
+        input,
+        statusEl,
+        setText(value){
+          input.value = value;
+          node.text = value;
+          markDirty();
+          renderEditor();
+        },
+        getText(){ return input.value || ''; }
+      } : null;
+    }
+
+    function getAiRefEls(scope){
+      return scope === 'modal'
+        ? {
+            btn: document.getElementById('modalAiRefBtn'),
+            select: document.getElementById('modalAiRefSelect')
+          }
+        : {
+            btn: document.getElementById('textEditorAiRefBtn'),
+            select: document.getElementById('textEditorAiRefSelect')
+          };
+    }
+
+    function ensureAiRefPref(scope){
+      if(!state.aiRefPrefs) state.aiRefPrefs = {};
+      if(!state.aiRefPrefs[scope]) state.aiRefPrefs[scope] = {enabled:false, source:'all'};
+      return state.aiRefPrefs[scope];
+    }
+
+    function getPrevNodeOptions(nodeId){
+      const script = getActiveScript();
+      if(!script || !script.nodes[nodeId]) return [];
+      const pmap = parentsMap(script);
+      const ids = (pmap[nodeId] || []).filter(id => script.nodes[id]);
+      return ids.map(id => ({value:id, label:getNodeSwitcherLabel(script.nodes[id]), text:script.nodes[id].text || ''}));
+    }
+
+    function refreshAiReferenceControls(scope){
+      const ctx = getAiEditorContext(scope);
+      const els = getAiRefEls(scope);
+      const pref = ensureAiRefPref(scope);
+      if(!ctx || !els.btn || !els.select) return;
+      const prevOptions = getPrevNodeOptions(ctx.nodeId);
+      if(!prevOptions.length){
+        pref.enabled = false;
+        pref.source = 'all';
+        els.btn.disabled = true;
+        els.btn.classList.remove('active');
+        els.select.classList.add('hidden');
+        els.select.innerHTML = '';
+        return;
+      }
+      els.btn.disabled = false;
+      if(!pref.source || (pref.source !== 'all' && !prevOptions.some(item => item.value === pref.source))){
+        pref.source = prevOptions.length > 1 ? 'all' : prevOptions[0].value;
+      }
+      const selectOptions = prevOptions.length > 1
+        ? [{value:'all', label:'全部参考'}].concat(prevOptions)
+        : prevOptions;
+      els.select.innerHTML = selectOptions.map(item => `<option value="${item.value}">${escapeHtml(item.label)}</option>`).join('');
+      els.select.value = pref.source;
+      els.select.classList.toggle('hidden', !pref.enabled || prevOptions.length <= 1);
+      els.btn.classList.toggle('active', !!pref.enabled);
+    }
+
+    function toggleAiReference(scope){
+      const pref = ensureAiRefPref(scope);
+      pref.enabled = !pref.enabled;
+      if(pref.enabled && !pref.source) pref.source = 'all';
+      refreshAiReferenceControls(scope);
+      const ctx = getAiEditorContext(scope);
+      if(ctx){
+        setAiStatus(ctx.statusEl, pref.enabled ? '已开启参考上一节点' : '仅扩写当前内容');
+      }
+    }
+
+    function collectAiPrevRefs(nodeId, scope){
+      const pref = ensureAiRefPref(scope);
+      if(!pref.enabled) return [];
+      const options = getPrevNodeOptions(nodeId);
+      if(!options.length) return [];
+      const selected = pref.source === 'all' ? options : options.filter(item => item.value === pref.source);
+      return selected.map(item => ({
+        id: item.value,
+        label: item.label,
+        text: String(item.text || '').trim().slice(0, 300)
+      })).filter(item => item.text);
+    }
+
+    function clearAiEditorText(scope){
+      const ctx = getAiEditorContext(scope);
+      if(!ctx) return;
+      ctx.setText('');
+      setAiStatus(ctx.statusEl, '已清空', 'success');
+      refreshAiUndoButton(scope);
+    }
+
+    function buildAiRequestContext(nodeId, scope){
+      const cfg = state.aiSettings || defaultAiSettings();
+      return {
+        styleText: cfg.styleText || '',
+        prevRefs: collectAiPrevRefs(nodeId, scope),
+        characterRefs: collectMatchedCharacterCards(getAiEditorContext(scope)?.getText?.() || '')
+      };
+    }
+
+    function refreshAiUndoButton(scope){
+      const ctx = getAiEditorContext(scope);
+      const undoBtn = document.getElementById(scope === 'modal' ? 'modalAiUndoBtn' : 'textEditorAiUndoBtn');
+      const regenBtn = document.getElementById(scope === 'modal' ? 'modalAiRegenerateBtn' : 'textEditorAiRegenerateBtn');
+      const baseText = ctx && state.aiDrafts[ctx.nodeId] ? state.aiDrafts[ctx.nodeId].originalText : '';
+      if(undoBtn) undoBtn.disabled = !baseText;
+      if(regenBtn) regenBtn.disabled = !(baseText || (ctx && ctx.getText().trim()));
+    }
+
+    function refreshAllAiControls(){
+      refreshAiUndoButton('modal');
+      refreshAiUndoButton('text');
+      refreshAiReferenceControls('modal');
+      refreshAiReferenceControls('text');
+    }
+
+    function setAiBusy(scope, busy){
+      const ids = scope === 'modal'
+        ? ['modalAiBtn','modalAiRegenerateBtn','modalAiUndoBtn','modalAiRefBtn','modalAiClearBtn']
+        : ['textEditorAiBtn','textEditorAiRegenerateBtn','textEditorAiUndoBtn','textEditorAiRefBtn','textEditorAiClearBtn'];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(!el) return;
+        if(id.endsWith('UndoBtn') && !busy){
+          refreshAiUndoButton(scope);
+        } else {
+          el.disabled = !!busy;
+        }
+      });
+    }
+
+    async function runAiExpand(scope, regenerate=false){
+      const ctx = getAiEditorContext(scope);
+      if(!ctx) return;
+      const draft = state.aiDrafts[ctx.nodeId];
+      const currentText = ctx.getText().trim();
+      const baseText = regenerate && draft?.originalText ? draft.originalText : currentText;
+      if(!baseText){
+        alert('请先在文本框里输入要扩写的情节。');
+        return;
+      }
+      const cfg = state.aiSettings || defaultAiSettings();
+      if(!cfg.apiKey || !cfg.baseUrl || !cfg.modelName){
+        alert('请先在设置里完成 AI API 配置。');
+        openAiSettingsModal();
+        return;
+      }
+      state.aiDrafts[ctx.nodeId] = {originalText: draft?.originalText || ctx.getText()};
+      const aiContext = buildAiRequestContext(ctx.nodeId, scope);
+      setAiStatus(ctx.statusEl, 'AI 生成中…');
+      setAiBusy(scope, true);
+      try{
+        const generated = await requestAiText(cfg, baseText, aiContext, false);
+        if(!generated) throw new Error('没有生成可用文本。');
+        ctx.setText(generated);
+        const refTag = aiContext.prevRefs?.length ? ' · 已参考上一节点' : '';
+        const charTag = aiContext.characterRefs?.length ? ' · 已参考人设' : '';
+        setAiStatus(ctx.statusEl, `AI 已生成${refTag}${charTag}`, 'success');
+      }catch(err){
+        setAiStatus(ctx.statusEl, `生成失败：${err.message || err}`, 'error');
+      }finally{
+        setAiBusy(scope, false);
+        refreshAiUndoButton(scope);
+        refreshAiReferenceControls(scope);
+      }
+    }
+
+    function undoAiExpand(scope){
+      const ctx = getAiEditorContext(scope);
+      if(!ctx) return;
+      const draft = state.aiDrafts[ctx.nodeId];
+      if(!draft || typeof draft.originalText !== 'string') return;
+      ctx.setText(draft.originalText);
+      delete state.aiDrafts[ctx.nodeId];
+      setAiStatus(ctx.statusEl, '已撤回', 'success');
+      refreshAiUndoButton(scope);
+    }
+
+    function createBlankScript(name='未命名剧本'){
+      return {
+        id: 'script_' + Math.random().toString(36).slice(2,10),
+        name,
+        createdAt: now(),
+        updatedAt: now(),
+        nodeCounter: 1,
+        anchorCounter: 0,
+        startId: '1',
+        nodes: {
+          '1': {id:'1', title:'故事开始', text:'在这里输入故事的第一幕。', kind:'scene', x:160, y:240, linearNext:null, options:[], locked:false, titleEnabled:true}
+        },
+        anchors: {}
+      };
+    }
+
+    function nextNumericId(script){
+      script.nodeCounter = (script.nodeCounter || 0) + 1;
+      return String(script.nodeCounter);
+    }
+    function nextAnchorId(script){
+      script.anchorCounter = (script.anchorCounter || 0) + 1;
+      return 'A' + String(script.anchorCounter);
+    }
+
+    function addNodeToScript(script, {title='新场景', text='', x=200, y=200, kind='scene'}={}){
+      const id = nextNumericId(script);
+      script.nodes[id] = {id, title, text, x, y, kind, linearNext:null, options:[], locked:false, titleEnabled:true};
+      script.updatedAt = now();
+      return script.nodes[id];
+    }
+    function addAnchorToScript(script, {x=300, y=300}={}){
+      const id = nextAnchorId(script);
+      script.anchors[id] = {id, x, y, prevRef:'', nextRef:'', locked:false};
+      script.updatedAt = now();
+      return script.anchors[id];
+    }
+
+    function getNodeDisplayTitle(node, mode='canvas'){
+      const enabled = node.titleEnabled !== false;
+      const raw = (node.title || '').trim();
+      if(!enabled) return '';
+      if(mode === 'switcher') return raw;
+      return raw || `独立节点${node.id}`;
+    }
+
+    function getNodeSwitcherLabel(node){
+      const title = getNodeDisplayTitle(node, 'switcher');
+      return title ? `${node.id}｜${title}` : `${node.id}`;
+    }
+
+    function normalizeScript(script){
+      script.nodes = script.nodes || {};
+      script.anchors = script.anchors || {};
+      Object.values(script.nodes).forEach(n => {
+        if(typeof n.titleEnabled === 'undefined') n.titleEnabled = true;
+      });
+      return script;
+    }
+
+    function loadLibrary(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if(raw) state.library = JSON.parse(raw);
+        if(state.library && state.library.scripts){ state.library.scripts = state.library.scripts.map(normalizeScript); }
+      }catch(e){}
+      if(!state.library.scripts.length){
+        const sample = createBlankScript('我的第一个剧本');
+        const a = sample.startId;
+        const b = addNodeToScript(sample, {title:'走左边', text:'左边是一片安静的树林。', x:560, y:140});
+        const c = addNodeToScript(sample, {title:'走右边', text:'右边通往一座旧钟楼。', x:560, y:360});
+        const d = addNodeToScript(sample, {title:'湖边汇合', text:'不同路线最终都来到湖边。', x:980, y:250});
+        const e = addNodeToScript(sample, {title:'平静结局', text:'主角在湖边找到答案。', x:1400, y:250, kind:'ending'});
+        sample.nodes[a].options = [{text:'走左边小路', nextId:b.id}, {text:'走右边石阶', nextId:c.id}];
+        sample.nodes[b.id].linearNext = d.id;
+        sample.nodes[c.id].linearNext = d.id;
+        sample.nodes[d.id].linearNext = e.id;
+        state.library = {scripts:[sample], activeScriptId:sample.id};
+        saveLibrary();
+      }
+    }
+
+    function saveLibrary(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.library)); }
+    function getActiveScript(){ return state.library.scripts.find(s => s.id === state.library.activeScriptId) || null; }
+    function getSelectedNode(){ const s = getActiveScript(); return s?.nodes?.[state.selectedNodeId] || null; }
+    function getSelectedAnchor(){ const s = getActiveScript(); return s?.anchors?.[state.selectedAnchorId] || null; }
+    function markDirty(){
+      const s = getActiveScript();
+      if(s) s.updatedAt = now();
+      saveLibrary();
+      renderHome();
+      updateEditorHeader();
+    }
+
+    function pushHistory(){
+      const s = getActiveScript();
+      if(!s) return;
+      state.history.push(JSON.stringify(s));
+      if(state.history.length > 50) state.history.shift();
+    }
+
+    function undoLastChange(){
+      const snap = state.history.pop();
+      if(!snap) return;
+      const restored = JSON.parse(snap);
+      const idx = state.library.scripts.findIndex(x => x.id === restored.id);
+      if(idx >= 0){
+        state.library.scripts[idx] = restored;
+        state.selectedNodeId = restored.startId || Object.keys(restored.nodes || {})[0] || null;
+        state.selectedAnchorId = null;
+        saveLibrary();
+        renderHome();
+        renderEditor();
+      }
+    }
+
+    function switchPage(page){
+      state.currentPage = page;
+      homePage.classList.toggle('active', page === 'home');
+      editorPage.classList.toggle('active', page === 'editor');
+    }
+
+    function setHomeSearchMode(open, focusInput=true){
+      state.homeSearchOpen = !!open;
+      const topbar = document.getElementById('homeTopbar');
+      const input = document.getElementById('homeSearchInput');
+      if(topbar) topbar.classList.toggle('searching', state.homeSearchOpen);
+      if(state.homeSearchOpen && focusInput && input){
+        requestAnimationFrame(() => {
+          input.focus();
+          const val = input.value || '';
+          input.setSelectionRange(val.length, val.length);
+        });
+      } else if(!state.homeSearchOpen && input){
+        input.blur();
+      }
+    }
+
+    function renderHome(){
+      const grid = document.getElementById('scriptGrid');
+      const empty = document.getElementById('homeEmptyState');
+      const searchInput = document.getElementById('homeSearchInput');
+      if(searchInput && searchInput.value !== state.search) searchInput.value = state.search;
+      setHomeSearchMode(state.homeSearchOpen || !!state.search, false);
+      const q = state.search.trim().toLowerCase();
+      const scripts = state.library.scripts.slice().sort((a,b)=>b.updatedAt-a.updatedAt).filter(s => !q || (s.name||'').toLowerCase().includes(q));
+      grid.innerHTML = '';
+      empty.classList.toggle('hidden', scripts.length !== 0);
+      scripts.forEach(script => {
+        const nodeCount = Object.keys(script.nodes || {}).length;
+        const endings = Object.values(script.nodes || {}).filter(n => n.kind === 'ending').length;
+        const card = document.createElement('div');
+        card.className = 'script-card';
+        card.innerHTML = `
+          <div class="script-card-title">${escapeHtml(script.name || '未命名剧本')}</div>
+          <div class="script-card-meta">${nodeCount} 节点 · ${endings} 结局<br>更新于 ${fmtTime(script.updatedAt)}</div>
+          <div class="script-card-actions">
+            <button class="text-btn cta" data-open="${script.id}">打开</button>
+            <button class="text-btn" data-rename="${script.id}">重命名</button>
+            <button class="text-btn" data-duplicate="${script.id}">复制</button>
+            <button class="text-btn dark" data-delete="${script.id}">删除</button>
+          </div>`;
+        grid.appendChild(card);
+      });
+      grid.querySelectorAll('[data-open]').forEach(btn => btn.addEventListener('click', () => {
+        state.library.activeScriptId = btn.dataset.open;
+        const s = getActiveScript();
+        state.selectedNodeId = s.startId;
+        state.selectedAnchorId = null;
+        state.validation = null;
+        switchPage('editor');
+        updateEditorHeader();
+        setDefaultView();
+        renderEditor();
+      }));
+      grid.querySelectorAll('[data-rename]').forEach(btn => btn.addEventListener('click', () => {
+        const s = state.library.scripts.find(x => x.id === btn.dataset.rename);
+        const name = prompt('剧本名称', s.name || '未命名剧本');
+        if(name === null) return;
+        s.name = name || '未命名剧本';
+        markDirty();
+      }));
+      grid.querySelectorAll('[data-duplicate]').forEach(btn => btn.addEventListener('click', () => {
+        const source = state.library.scripts.find(x => x.id === btn.dataset.duplicate);
+        const copy = deepCopy(source);
+        copy.id = 'script_' + Math.random().toString(36).slice(2,10);
+        copy.name = (copy.name || '未命名剧本') + '（副本）';
+        copy.createdAt = now();
+        copy.updatedAt = now();
+        state.library.scripts.unshift(copy);
+        markDirty();
+      }));
+      grid.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', () => {
+        const s = state.library.scripts.find(x => x.id === btn.dataset.delete);
+        if(state.library.scripts.length <= 1){ alert('至少保留一个剧本。'); return; }
+        if(!confirm(`确认删除剧本「${s.name}」？`)) return;
+        state.library.scripts = state.library.scripts.filter(x => x.id !== s.id);
+        if(state.library.activeScriptId === s.id) state.library.activeScriptId = state.library.scripts[0]?.id || null;
+        markDirty();
+      }));
+    }
+
+    function updateEditorHeader(){
+      const s = getActiveScript();
+      const nodeCount = s ? Object.keys(s.nodes).length : 0;
+      const anchorCount = s ? Object.keys(s.anchors || {}).length : 0;
+      const endings = s ? Object.values(s.nodes).filter(n => n.kind === 'ending').length : 0;
+      document.getElementById('editorScriptTitle').textContent = s?.name || '未命名剧本';
+      document.getElementById('editorScriptMeta').textContent = `${nodeCount} 节点 · ${endings} 结局 · 自动保存`;
+      document.getElementById('graphStats').textContent = `${nodeCount} 节点 · ${endings} 结局 · ${anchorCount} 锚点`;
+    }
+
+    function targetNodeOptions(includeBlank=true, excludeId=null, endingsOnly=false){
+      const s = getActiveScript();
+      const arr = [];
+      if(includeBlank) arr.push({value:'', label:'未连接'});
+      Object.values(s.nodes).forEach(n => {
+        if(excludeId && n.id === excludeId) return;
+        if(endingsOnly && n.kind !== 'ending') return;
+        arr.push({value:n.id, label:`${n.id}｜${n.title || '未命名节点'}`});
+      });
+      return arr;
+    }
+
+    function getOutgoing(node){
+      const outs = [];
+      if(node.options?.length){
+        node.options.forEach((opt, idx) => outs.push({to: opt.nextId || null, type:'option', label: opt.text || `选项${idx+1}`, index: idx}));
+      } else if(node.linearNext){
+        outs.push({to: node.linearNext, type:'linear', label:'下一幕'});
+      }
+      return outs;
+    }
+
+    function parentsMap(script){
+      const map = {};
+      Object.values(script.nodes).forEach(n => map[n.id] = []);
+      Object.values(script.nodes).forEach(n => getOutgoing(n).forEach(e => { if(e.to && script.nodes[e.to]) map[e.to].push(n.id); }));
+      return map;
+    }
+
+    function reachable(script){
+      const seen = new Set();
+      if(!script.startId || !script.nodes[script.startId]) return seen;
+      const stack = [script.startId];
+      while(stack.length){
+        const id = stack.pop();
+        if(seen.has(id)) continue;
+        seen.add(id);
+        getOutgoing(script.nodes[id]).forEach(e => { if(e.to && script.nodes[e.to]) stack.push(e.to); });
+      }
+      return seen;
+    }
+
+    function canReachEnding(script){
+      const rev = parentsMap(script);
+      const endings = Object.values(script.nodes).filter(n => n.kind === 'ending').map(n => n.id);
+      const seen = new Set();
+      const stack = [...endings];
+      while(stack.length){
+        const id = stack.pop();
+        if(seen.has(id)) continue;
+        seen.add(id);
+        (rev[id] || []).forEach(pid => stack.push(pid));
+      }
+      return seen;
+    }
+
+    function findCycles(script){
+      const visited = new Set();
+      const inStack = new Set();
+      const bad = new Set();
+      function dfs(id){
+        visited.add(id); inStack.add(id);
+        getOutgoing(script.nodes[id]).forEach(e => {
+          if(!e.to || !script.nodes[e.to]) return;
+          if(!visited.has(e.to)) dfs(e.to);
+          else if(inStack.has(e.to)){ bad.add(id); bad.add(e.to); }
+        });
+        inStack.delete(id);
+      }
+      Object.values(script.nodes).forEach(n => { if(!visited.has(n.id)) dfs(n.id); });
+      return [...bad];
+    }
+
+    function validateCurrentScript(){
+      const script = getActiveScript();
+      const errors = [];
+      const reach = reachable(script);
+      const toEnd = canReachEnding(script);
+      const cycles = findCycles(script);
+      const nodes = Object.values(script.nodes);
+      const endings = nodes.filter(n => n.kind === 'ending');
+
+      if(!script.startId || !script.nodes[script.startId]) errors.push({nodeId:null, text:'缺少起始节点。'});
+      if(nodes.length === 0) errors.push({nodeId:null, text:'当前没有节点。'});
+      if(endings.length === 0) errors.push({nodeId:null, text:'当前没有结局节点。至少需要一个结局。'});
+
+      nodes.forEach(node => {
+        if(node.kind === 'ending'){
+          if(node.linearNext || node.options.length) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」被标记为结局，但仍然连接了后续。`});
+          if(!reach.has(node.id)) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」无法从起始节点到达。`});
+          return;
+        }
+        if(node.options.length > 4) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」的选项超过 4 个。`});
+        if(node.options.length){
+          node.options.forEach((opt, idx) => {
+            if(!opt.text || !opt.text.trim()) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」的选项 ${idx+1} 没有填写文字。`});
+            if(!opt.nextId || !script.nodes[opt.nextId]) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」的选项 ${idx+1} 没有连接到有效节点。`});
+          });
+        } else {
+          if(!node.linearNext || !script.nodes[node.linearNext]) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」既不是结局，也没有连接下一幕。`});
+        }
+        if(!reach.has(node.id)) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」无法从起始节点到达。`});
+        if(!toEnd.has(node.id)) errors.push({nodeId:node.id, text:`${node.id}「${node.title}」无法通向任何结局。`});
+      });
+
+      Object.values(script.anchors || {}).forEach(a => {
+        if(a.prevRef && !resolveRefCenter(a.prevRef)) errors.push({nodeId:null, text:`锚点 ${a.id} 的左侧编号无效。`});
+        if(a.nextRef && !resolveRefCenter(a.nextRef)) errors.push({nodeId:null, text:`锚点 ${a.id} 的右侧编号无效。`});
+      });
+
+      cycles.forEach(id => errors.push({nodeId:id, text:`${id}「${script.nodes[id].title}」位于循环连接中。整体应保持单向推进。`}));
+
+      const dedup = []; const seen = new Set();
+      errors.forEach(e => { const k = `${e.nodeId||'global'}|${e.text}`; if(!seen.has(k)){ seen.add(k); dedup.push(e); } });
+      state.validation = {ok: dedup.length === 0, errors: dedup, problemNodeIds:[...new Set(dedup.map(e=>e.nodeId).filter(Boolean))]};
+      renderEditor();
+      return state.validation;
+    }
+
+    function renderValidationModal(){
+      const v = state.validation || validateCurrentScript();
+      const wrap = document.getElementById('modalValidationList');
+      wrap.innerHTML = '';
+      if(v.ok){
+        wrap.innerHTML = '<div class="alert success">结构通过校验，可以导出故事 TXT 和文字游戏 HTML。</div>';
+      } else {
+        v.errors.forEach(err => {
+          const div = document.createElement('div');
+          div.className = 'alert error';
+          div.textContent = err.text;
+          if(err.nodeId){
+            div.style.cursor = 'pointer';
+            div.addEventListener('click', () => {
+              closeModal();
+              state.selectedNodeId = err.nodeId;
+              renderEditor();
+              focusNode(err.nodeId);
+            });
+          }
+          wrap.appendChild(div);
+        });
+      }
+    }
+
+    function renderEditor(){
+      updateEditorHeader();
+      renderGraph();
+    }
+
+    function renderGraph(){
+      [...world.querySelectorAll('.node,.anchor')].forEach(el => el.remove());
+      const s = getActiveScript();
+      const problemSet = new Set(state.validation?.problemNodeIds || []);
+
+      Object.values(s.nodes).forEach(node => {
+        const el = document.createElement('div');
+        el.dataset.nodeId = node.id;
+        el.className = 'node' + (node.id === state.selectedNodeId ? ' active' : '') + (problemSet.has(node.id) ? ' error' : '') + (node.kind === 'ending' ? ' ending' : '') + (node.locked ? ' locked' : '');
+        el.style.left = node.x + 'px';
+        el.style.top = node.y + 'px';
+        const outCount = getOutgoing(node).length;
+        const plusAllowed = node.kind !== 'ending';
+        el.innerHTML = `
+          <div class="node-top">
+            <div class="node-badges">
+              ${node.id === s.startId ? '<span class="badge">起点</span>' : ''}
+              ${node.kind === 'ending' ? '<span class="badge">结局</span>' : ''}
+              ${node.options.length ? `<span class="badge">${node.options.length} 选项</span>` : ''}
+            </div>
+            <div class="node-actions">
+              <button class="icon-pill ${node.locked ? 'locked' : ''}" data-lock="${node.id}" title="固定">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 11V8A4 4 0 0 1 16 8V11" stroke="currentColor" stroke-width="2"/><rect x="6" y="11" width="12" height="9" rx="2" stroke="currentColor" stroke-width="2"/></svg>
+              </button>
+              <button class="icon-pill edit" data-edit="${node.id}" title="编辑">编辑</button>
+              <button class="icon-pill" data-delete="${node.id}" title="删除">
+                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+          ${getNodeDisplayTitle(node) ? `<div class="node-title">${escapeHtml(getNodeDisplayTitle(node))}</div>` : ''}
+          <div class="node-body">${escapeHtml(node.text || '（暂无场景文字）')}</div>
+          <div class="node-footer">
+            <span>${node.id}</span>
+            <span>${outCount} 连出</span>
+          </div>
+          ${plusAllowed ? `<button class="node-plus" data-node-plus="${node.id}" title="新增">+</button>` : ''}
+        `;
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.selectedNodeId = node.id;
+          state.selectedAnchorId = null;
+          renderEditor();
+        });
+        bindNodeDrag(el, node.id);
+        world.appendChild(el);
+      });
+
+      Object.values(s.anchors || {}).forEach(anchor => {
+        const a = document.createElement('div');
+        a.className = 'anchor' + (anchor.id === state.selectedAnchorId ? ' active' : '') + (anchor.locked ? ' locked' : '');
+        a.style.left = `${anchor.x - 16}px`;
+        a.style.top = `${anchor.y - 16}px`;
+        a.innerHTML = `<div class="anchor-label">${anchor.id}</div>`;
+        a.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.selectedAnchorId = anchor.id;
+          state.selectedNodeId = null;
+          renderEditor();
+        });
+        bindAnchorDrag(a, anchor.id);
+        bindAnchorLongPress(a, anchor.id);
+        world.appendChild(a);
+      });
+
+      drawEdges();
+      applyWorldTransform();
+    }
+
+    function getNodeBox(nodeId){
+      const s = getActiveScript();
+      const node = s?.nodes?.[nodeId];
+      if(!node) return null;
+      const el = world.querySelector(`.node[data-node-id="${CSS.escape(String(nodeId))}"]`);
+      const width = el?.offsetWidth || (window.innerWidth <= 860 ? 254 : 292);
+      const height = el?.offsetHeight || 208;
+      return {id: String(nodeId), x: node.x, y: node.y, width, height};
+    }
+
+    function getNodeCenter(nodeId){
+      const box = getNodeBox(nodeId);
+      return box ? {x: box.x + box.width / 2, y: box.y + box.height / 2} : null;
+    }
+
+    function resolveRefCenter(ref){
+      const s = getActiveScript();
+      if(!ref) return null;
+      if(refIsAnchor(ref)){
+        const a = s.anchors[ref];
+        return a ? {x:a.x, y:a.y} : null;
+      }
+      return getNodeCenter(ref);
+    }
+
+    function normalizeVector(x, y){
+      const len = Math.hypot(x, y) || 1;
+      return {x: x / len, y: y / len};
+    }
+
+    
+function getNodePlusPort(nodeId){
+      const box = getNodeBox(nodeId);
+      if(!box) return null;
+      return {
+        x: round1(box.x + box.width + 1),
+        y: round1(box.y + box.height / 2)
+      };
+    }
+
+    function getNodeOutputPort(nodeId, optionIndex=0){
+      const s = getActiveScript();
+      const node = s?.nodes?.[nodeId];
+      const box = getNodeBox(nodeId);
+      if(!box || !node) return null;
+      if(node.options && node.options.length){
+        return getNodePlusPort(nodeId);
+      }
+      return {
+        x: round1(box.x + box.width + 1),
+        y: round1(clamp(box.y + 104, box.y + 26, box.y + box.height - 26))
+      };
+    }
+
+    function getNodeInputPort(nodeId){
+      const box = getNodeBox(nodeId);
+      if(!box) return null;
+      return {
+        x: round1(box.x - 4),
+        y: round1(clamp(box.y + 108, box.y + 26, box.y + box.height - 26))
+      };
+    }
+
+    function buildAnchorChain(fromRef, toRef){
+      const s = getActiveScript();
+      const targetRef = String(toRef);
+      const grouped = new Map();
+
+      Object.values(s.anchors || {}).forEach(anchor => {
+        const prevRef = String(anchor.prevRef || '').trim();
+        if(!prevRef) return;
+        if(!grouped.has(prevRef)) grouped.set(prevRef, []);
+        grouped.get(prevRef).push(anchor);
+      });
+
+      function dfs(currentRef, seen = new Set()){
+        const candidates = grouped.get(String(currentRef)) || [];
+        for(const anchor of candidates){
+          if(seen.has(anchor.id)) continue;
+          const nextRef = String(anchor.nextRef || '').trim();
+          if(!nextRef) continue;
+          if(nextRef === targetRef) return [anchor];
+          if(refIsAnchor(nextRef)){
+            const nextSeen = new Set(seen);
+            nextSeen.add(anchor.id);
+            const tail = dfs(nextRef, nextSeen);
+            if(tail) return [anchor, ...tail];
+          }
+        }
+        return null;
+      }
+
+      return dfs(String(fromRef), new Set()) || [];
+    }
+
+    function pushUniquePoint(points, point){
+      if(!point) return;
+      const last = points[points.length - 1];
+      if(last && Math.hypot(last.x - point.x, last.y - point.y) < 0.5) return;
+      points.push({x: Math.round(point.x * 10) / 10, y: Math.round(point.y * 10) / 10});
+    }
+
+    function round1(v){
+      return Math.round(v * 10) / 10;
+    }
+
+    function getIncomingLaneInfo(targetId, fromNodeId, optionIndex = 0){
+      const s = getActiveScript();
+      const incoming = [];
+      Object.values(s.nodes).forEach(srcNode => {
+        getOutgoing(srcNode).forEach((edge, idx) => {
+          if(String(edge.to || '') !== String(targetId)) return;
+          const port = getNodeOutputPort(srcNode.id, idx) || {x: 0, y: 0};
+          incoming.push({
+            fromId: String(srcNode.id),
+            optionIndex: idx,
+            x: port.x,
+            y: port.y
+          });
+        });
+      });
+      incoming.sort((a, b) => (
+        a.y - b.y ||
+        a.x - b.x ||
+        String(a.fromId).localeCompare(String(b.fromId)) ||
+        a.optionIndex - b.optionIndex
+      ));
+      let rank = incoming.findIndex(item => String(item.fromId) === String(fromNodeId) && Number(item.optionIndex) === Number(optionIndex));
+      if(rank < 0) rank = 0;
+      return {total: incoming.length || 1, rank};
+    }
+
+    function edgeBendSeed(fromNodeId, toNodeId, optionIndex = 0){
+      const raw = `${fromNodeId}|${toNodeId}|${optionIndex}`;
+      let total = 0;
+      for(const ch of raw) total += ch.charCodeAt(0);
+      return total % 2 === 0 ? 1 : -1;
+    }
+
+    function buildSmoothGuidePoints(fromNodeId, toNodeId, optionIndex = 0){
+      const s = getActiveScript();
+      const node = s?.nodes?.[fromNodeId];
+      const chain = buildAnchorChain(fromNodeId, toNodeId);
+      const start = getNodeOutputPort(fromNodeId, optionIndex);
+      const end = getNodeInputPort(toNodeId);
+      if(!start || !end) return null;
+
+      const optionCount = node?.options?.length || 0;
+      const incomingLane = getIncomingLaneInfo(toNodeId, fromNodeId, optionIndex);
+
+      const dx = end.x - start.x;
+      const dy = end.y - start.y;
+      const absAngle = Math.atan2(Math.abs(dy), Math.max(1, Math.abs(dx))) * 180 / Math.PI;
+
+      const fanIndex = optionCount > 1 ? (optionIndex - (optionCount - 1) / 2) : 0;
+      const fanBias = round1(fanIndex * 20);
+      const laneBias = round1(incomingLane.total > 1 ? (incomingLane.rank - (incomingLane.total - 1) / 2) * 14 : 0);
+
+      const straightEligible = !chain.length && absAngle <= 75;
+      if(straightEligible){
+        return { points: [start, end], chain, start, end };
+      }
+
+      const outLead = round1(clamp(Math.abs(dx) * 0.16, optionCount > 1 ? 18 : 22, optionCount > 1 ? 34 : 46));
+      const inLead = round1(clamp(Math.abs(dx) * 0.14, 18, 34));
+      const points = [];
+      pushUniquePoint(points, start);
+
+      const stemOut = {
+        x: round1(start.x + outLead),
+        y: round1(start.y + fanBias * 0.5)
+      };
+      pushUniquePoint(points, stemOut);
+
+      if(chain.length){
+        chain.forEach(anchor => {
+          pushUniquePoint(points, {x: round1(anchor.x), y: round1(anchor.y)});
+        });
+
+        if(Math.abs(laneBias) > 0.5){
+          pushUniquePoint(points, {
+            x: round1(end.x - inLead - 8),
+            y: round1(end.y + laneBias)
+          });
+        }
+
+        pushUniquePoint(points, {
+          x: round1(end.x - inLead),
+          y: round1(end.y + laneBias * 0.35)
+        });
+        pushUniquePoint(points, end);
+        return {points, chain, start, end};
+      }
+
+      const needMiddle = optionCount > 1 || incomingLane.total > 1 || Math.abs(dy) > 56;
+      if(needMiddle){
+        const midX = round1(start.x + dx * 0.5);
+        const midY = round1(start.y + dy * 0.5 + (fanBias - laneBias) * 0.18);
+        pushUniquePoint(points, {x: midX, y: midY});
+      }
+
+      if(Math.abs(laneBias) > 0.5){
+        pushUniquePoint(points, {
+          x: round1(end.x - inLead - 8),
+          y: round1(end.y + laneBias)
+        });
+      }
+
+      pushUniquePoint(points, {
+        x: round1(end.x - inLead),
+        y: round1(end.y + laneBias * 0.35)
+      });
+      pushUniquePoint(points, end);
+      return {points, chain, start, end};
+    }
+
+    function buildSplineTangents(points){
+      const tangents = [];
+      const last = points.length - 1;
+      for(let i = 0; i <= last; i++){
+        if(i === 0){
+          tangents.push(normalizeVector(points[1].x - points[0].x, points[1].y - points[0].y));
+          continue;
+        }
+        if(i === last){
+          tangents.push(normalizeVector(points[last].x - points[last - 1].x, points[last].y - points[last - 1].y));
+          continue;
+        }
+        tangents.push(normalizeVector(
+          points[i + 1].x - points[i - 1].x,
+          points[i + 1].y - points[i - 1].y
+        ));
+      }
+      return tangents;
+    }
+
+    function smoothEdgePath(points){
+      if(!points || points.length < 2) return '';
+      if(points.length === 2){
+        const p0 = points[0];
+        const p1 = points[1];
+        return `M ${round1(p0.x)} ${round1(p0.y)} L ${round1(p1.x)} ${round1(p1.y)}`;
+      }
+
+      const tangents = buildSplineTangents(points);
+      let d = `M ${round1(points[0].x)} ${round1(points[0].y)}`;
+      for(let i = 0; i < points.length - 1; i++){
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const t1 = tangents[i];
+        const t2 = tangents[i + 1];
+        const segLen = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        const handle = Math.min(52, Math.max(12, segLen * 0.34));
+        const c1 = {
+          x: round1(i === 0 ? Math.max(p1.x + 8, p1.x + t1.x * handle) : p1.x + t1.x * handle),
+          y: round1(p1.y + t1.y * handle)
+        };
+        const c2 = {
+          x: round1(i === points.length - 2 ? Math.min(p2.x - 8, p2.x - t2.x * handle) : p2.x - t2.x * handle),
+          y: round1(p2.y - t2.y * handle)
+        };
+        d += ` C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${round1(p2.x)} ${round1(p2.y)}`;
+      }
+      return d;
+    }
+
+    function buildEdgePath(fromNodeId, toNodeId, optionIndex = 0){
+      const payload = buildSmoothGuidePoints(fromNodeId, toNodeId, optionIndex);
+      if(!payload) return null;
+      return {
+        d: smoothEdgePath(payload.points),
+        points: payload.points,
+        chain: payload.chain,
+        start: payload.start,
+        end: payload.end
+      };
+    }
+
+
+function drawEdges(){
+  const s = getActiveScript();
+  edges.setAttribute('viewBox', `0 0 3600 2600`);
+  edgeOverlay.setAttribute('viewBox', `0 0 3600 2600`);
+  edges.innerHTML = '';
+  edgeOverlay.innerHTML = '';
+
+  Object.values(s.nodes).forEach(node => {
+    if(node.options.length){
+      node.options.forEach((opt, idx) => {
+        if(!opt.nextId || !s.nodes[opt.nextId]) return;
+        const pathData = buildEdgePath(node.id, opt.nextId, idx);
+        drawSegmentChain(pathData, opt.text || `选项${idx + 1}`, {kind:'option', fromId:node.id, optionIndex:idx});
+      });
+    } else if(node.linearNext && s.nodes[node.linearNext]){
+      const pathData = buildEdgePath(node.id, node.linearNext, 0);
+      drawSegmentChain(pathData, null, {kind:'linear', fromId:node.id});
+    }
+  });
+}
+
+function appendEdgeArrow(pathEl){
+  const total = pathEl.getTotalLength ? pathEl.getTotalLength() : 0;
+  if(!total) return;
+  const tip = pathEl.getPointAtLength(total);
+  const back = pathEl.getPointAtLength(Math.max(0, total - 14));
+  const dir = normalizeVector(tip.x - back.x, tip.y - back.y);
+  const size = 13;
+  const base = {x: tip.x - dir.x * size, y: tip.y - dir.y * size};
+  const normal = {x: -dir.y * size * 0.52, y: dir.x * size * 0.52};
+
+  const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+  arrow.setAttribute('class', 'edge-arrow');
+  arrow.setAttribute('points', [
+    `${round1(tip.x)},${round1(tip.y)}`,
+    `${round1(base.x + normal.x)},${round1(base.y + normal.y)}`,
+    `${round1(base.x - normal.x)},${round1(base.y - normal.y)}`
+  ].join(' '));
+  edgeOverlay.appendChild(arrow);
+}
+
+function appendEdgeLabel(pathEl, label){
+  if(!label) return;
+  const total = pathEl.getTotalLength ? pathEl.getTotalLength() : 0;
+  if(!total) return;
+  const centerDist = total * 0.5;
+  const pos = pathEl.getPointAtLength(centerDist);
+  const back = pathEl.getPointAtLength(Math.max(0, centerDist - 10));
+  const ahead = pathEl.getPointAtLength(Math.min(total, centerDist + 10));
+  const dir = normalizeVector(ahead.x - back.x, ahead.y - back.y);
+  let normal = {x: -dir.y, y: dir.x};
+  if(normal.y > 0) normal = {x: -normal.x, y: -normal.y};
+
+  const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  textEl.setAttribute('x', round1(pos.x + normal.x * 12));
+  textEl.setAttribute('y', round1(pos.y + normal.y * 12));
+  textEl.setAttribute('text-anchor', 'middle');
+  textEl.setAttribute('dominant-baseline', 'middle');
+  textEl.setAttribute('class', 'edge-label');
+  textEl.textContent = label;
+  edgeOverlay.appendChild(textEl);
+}
+
+function drawSegmentChain(pathData, label, meta){
+  if(!pathData || !pathData.d) return;
+
+  const hit = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  hit.setAttribute('d', pathData.d);
+  hit.setAttribute('class', 'edge-hit');
+  hit.dataset.kind = meta.kind;
+  hit.dataset.fromId = meta.fromId;
+  if(meta.optionIndex !== undefined) hit.dataset.optionIndex = String(meta.optionIndex);
+  bindEdgeDeleteLongPress(hit);
+  edges.appendChild(hit);
+
+  const visual = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  visual.setAttribute('d', pathData.d);
+  visual.setAttribute('class', 'edge-visual');
+  edges.appendChild(visual);
+
+  appendEdgeArrow(visual);
+  appendEdgeLabel(visual, label);
+}
+
+function bindEdgeDeleteLongPress(pathEl){
+
+
+      pathEl.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const kind = pathEl.dataset.kind;
+        const fromId = pathEl.dataset.fromId;
+        const s = getActiveScript();
+        const node = s.nodes[fromId];
+        if(!node) return;
+        if(!confirm('删除这条连线？')) return;
+        pushHistory();
+        if(kind === 'linear') node.linearNext = null;
+        else if(kind === 'option'){
+          const idx = Number(pathEl.dataset.optionIndex);
+          if(node.options[idx]) node.options[idx].nextId = null;
+        }
+        markDirty();
+        renderEditor();
+      });
+    }
+
+    function bindNodeDrag(el, nodeId){
+      let dragging = false, moved = false, startClient = null, startPos = null;
+      el.addEventListener('pointerdown', (e) => {
+        if(e.target.closest('.node-plus,.icon-pill')) return;
+        const node = getActiveScript().nodes[nodeId];
+        if(node.locked) return;
+        e.stopPropagation();
+        dragging = true; moved = false;
+        startClient = {x:e.clientX, y:e.clientY};
+        startPos = {x:node.x, y:node.y};
+        el.setPointerCapture?.(e.pointerId);
+      });
+      el.addEventListener('pointermove', (e) => {
+        if(!dragging) return;
+        const node = getActiveScript().nodes[nodeId];
+        const dx = (e.clientX - startClient.x) / state.view.scale;
+        const dy = (e.clientY - startClient.y) / state.view.scale;
+        if(Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+        node.x = Math.round(startPos.x + dx);
+        node.y = Math.round(startPos.y + dy);
+        el.style.left = node.x + 'px';
+        el.style.top = node.y + 'px';
+        drawEdges();
+      });
+      el.addEventListener('pointerup', () => { if(dragging && moved) { pushHistory(); markDirty(); } dragging = false; });
+      el.addEventListener('pointercancel', () => dragging = false);
+
+      el.querySelector('[data-edit]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.selectedNodeId = nodeId;
+        openNodeEditModal();
+      });
+      el.querySelector('[data-lock]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const n = getActiveScript().nodes[nodeId];
+        pushHistory();
+        n.locked = !n.locked;
+        markDirty();
+        renderEditor();
+      });
+      el.querySelector('[data-delete]').addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.selectedNodeId = nodeId;
+        deleteSelectedNode();
+      });
+      const plus = el.querySelector('[data-node-plus]');
+      if(plus){
+        plus.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.selectedNodeId = nodeId;
+          openActionSheetForNode(nodeId);
+        });
+      }
+    }
+
+    function bindAnchorDrag(el, anchorId){
+      let dragging = false, moved = false, startClient = null, startPos = null;
+      el.addEventListener('pointerdown', (e) => {
+        const anchor = getActiveScript().anchors[anchorId];
+        if(anchor.locked) return;
+        e.stopPropagation();
+        dragging = true; moved = false;
+        startClient = {x:e.clientX, y:e.clientY};
+        startPos = {x:anchor.x, y:anchor.y};
+        el.setPointerCapture?.(e.pointerId);
+      });
+      el.addEventListener('pointermove', (e) => {
+        if(!dragging) return;
+        const a = getActiveScript().anchors[anchorId];
+        const dx = (e.clientX - startClient.x) / state.view.scale;
+        const dy = (e.clientY - startClient.y) / state.view.scale;
+        if(Math.abs(dx) > 2 || Math.abs(dy) > 2) moved = true;
+        a.x = Math.round(startPos.x + dx);
+        a.y = Math.round(startPos.y + dy);
+        el.style.left = `${a.x - 16}px`;
+        el.style.top = `${a.y - 16}px`;
+        drawEdges();
+      });
+      el.addEventListener('pointerup', () => { if(dragging && moved) { pushHistory(); markDirty(); } dragging = false; });
+      el.addEventListener('pointercancel', () => dragging = false);
+    }
+
+    function bindAnchorLongPress(el, anchorId){
+      el.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        state.selectedAnchorId = anchorId;
+        openAnchorEditModal();
+      });
+    }
+
+    function applyWorldTransform(){ world.style.transform = `translate(${state.view.x}px, ${state.view.y}px) scale(${state.view.scale})`; }
+
+    function currentViewportWorldCenter(){
+      const rect = viewport.getBoundingClientRect();
+      return {
+        x: Math.round((rect.width / 2 - state.view.x) / state.view.scale),
+        y: Math.round((rect.height / 2 - state.view.y) / state.view.scale)
+      };
+    }
+
+    function focusNode(nodeId){
+      const node = getActiveScript().nodes[nodeId];
+      const nodeWidth = window.innerWidth <= 860 ? 254 : 292;
+      const vw = viewport.clientWidth, vh = viewport.clientHeight;
+      state.view.x = clamp((vw/2) - (node.x + nodeWidth/2) * state.view.scale, -2600, 1000);
+      state.view.y = clamp((vh/2) - (node.y + 100) * state.view.scale, -2200, 1000);
+      applyWorldTransform();
+    }
+
+    function setDefaultView(){
+      const s = getActiveScript();
+      const start = s?.nodes?.[s.startId];
+      if(!start) return;
+      state.view = {x: 80, y: 140, scale: window.innerWidth < 860 ? 0.68 : 0.78};
+      focusNode(start.id);
+    }
+
+    function openModal(id){
+      state.activeModal = id;
+      modalBackdrop.classList.add('open');
+      ['modalNodeEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => {
+        document.getElementById(mid).classList.toggle('hidden', mid !== id);
+      });
+    }
+    function closeModal(){
+      state.activeModal = null;
+      modalBackdrop.classList.remove('open');
+      ['modalNodeEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => document.getElementById(mid).classList.add('hidden'));
+    }
+
+    
+    function syncTitleToggleButtons(node){
+      const enabled = node.titleEnabled !== false;
+      const plusSvg = '<svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+      const closeSvg = '<svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>';
+      const modalBtn = document.getElementById('modalClearTitle');
+      const textBtn = document.getElementById('textEditorClearTitleBtn');
+      if(modalBtn){ modalBtn.innerHTML = enabled ? closeSvg : plusSvg; modalBtn.title = enabled ? '删除标题' : '启用标题'; }
+      if(textBtn){ textBtn.innerHTML = enabled ? closeSvg : plusSvg; textBtn.title = enabled ? '删除标题' : '启用标题'; }
+      const modalInput = document.getElementById('modalNodeTitle');
+      const textInput = document.getElementById('textEditorTitleInput');
+      if(modalInput) modalInput.disabled = !enabled;
+      if(textInput) textInput.disabled = !enabled;
+    }
+
+    function openTextEditor(){
+      const screen = document.getElementById('textEditorScreen');
+      const sel = document.getElementById('textEditorNodeSwitch');
+      const s = getActiveScript();
+      const nodes = Object.values(s.nodes);
+      sel.innerHTML = nodes.map(n => `<option value="${n.id}">${escapeHtml(getNodeSwitcherLabel(n))}</option>`).join('');
+      sel.value = state.selectedNodeId || s.startId;
+      syncTextEditorFromNode(sel.value);
+      settingsPanel.classList.remove('open');
+      screen.classList.add('open');
+    }
+
+    function closeTextEditor(){
+      document.getElementById('textEditorScreen').classList.remove('open');
+      settingsPanel.classList.remove('open');
+    }
+
+    function syncTextEditorFromNode(nodeId){
+      const s = getActiveScript();
+      const n = s.nodes[nodeId];
+      if(!n) return;
+      state.selectedNodeId = nodeId;
+      const titleInput = document.getElementById('textEditorTitleInput');
+      titleInput.value = n.title || '';
+      titleInput.disabled = n.titleEnabled === false;
+      titleInput.placeholder = ((n.title || '').trim() ? n.title : '无标题');
+      syncTitleToggleButtons(n);
+      document.getElementById('textEditorBodyInput').value = n.text || '';
+      setAiStatus(document.getElementById('textEditorAiStatus'), '');
+      refreshAiUndoButton('text');
+      refreshAiReferenceControls('text');
+    }
+
+function openNodeEditModal(){
+      const node = getSelectedNode();
+      document.getElementById('modalNodeTitle').value = node.title || '';
+      document.getElementById('modalNodeTitle').disabled = node.titleEnabled === false;
+      document.getElementById('modalNodeText').value = node.text || '';
+      document.getElementById('modalNodeKind').value = node.kind;
+      document.getElementById('modalNodeId').value = node.id;
+      document.getElementById('modalPosX').value = node.x;
+      document.getElementById('modalPosY').value = node.y;
+      document.getElementById('modalTextCount').textContent = `字数：${(node.text || '').length}`;
+      syncTitleToggleButtons(node);
+      document.getElementById('modalOptionsEditorBlock').classList.add('hidden');
+      document.getElementById('modalOptionsEditor').innerHTML = '';
+      setAiStatus(document.getElementById('modalAiStatus'), '');
+      openModal('modalNodeEdit');
+      refreshAiUndoButton('modal');
+      refreshAiReferenceControls('modal');
+    }
+
+    function openAnchorEditModal(){
+      const a = getSelectedAnchor();
+      if(!a) return;
+      document.getElementById('anchorIdView').value = a.id;
+      document.getElementById('anchorPrevInput').value = a.prevRef || '';
+      document.getElementById('anchorNextInput').value = a.nextRef || '';
+      document.getElementById('anchorToggleLockBtn').textContent = a.locked ? '取消固定' : '固定锚点';
+      openModal('modalAnchorEdit');
+    }
+
+    function openActionSheet(items, note='选择一个操作'){
+      const grid = document.getElementById('sheetGrid');
+      grid.innerHTML = '';
+      document.getElementById('sheetNote').textContent = note;
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'sheet-item';
+        btn.innerHTML = `<div class="sheet-icon">${item.icon}</div><div class="sheet-label">${item.label}</div>`;
+        btn.addEventListener('click', () => { closeActionSheet(); item.action(); });
+        grid.appendChild(btn);
+      });
+      sheetBackdrop.classList.add('open');
+    }
+    function closeActionSheet(){ sheetBackdrop.classList.remove('open'); }
+
+    function openActionSheetForNode(nodeId){
+      const node = getActiveScript().nodes[nodeId];
+      if(node.kind === 'ending') return;
+      if(node.options.length){
+        openActionSheet([
+          {icon:ICONS.option, label:'调整选项', action:() => openOptionAdjustModal(nodeId)},
+          {icon:ICONS.link, label:'连接已有节点', action:() => openConnectExisting({type:'option-unfilled', nodeId})}
+        ], '选项节点操作');
+      } else {
+        openActionSheet([
+          {icon:ICONS.scene, label:'新建场景', action:() => createFromNode(nodeId,'scene')},
+          {icon:ICONS.option, label:'新建选项', action:() => openOptionAdjustModal(nodeId, true)},
+          {icon:ICONS.ending, label:'新建结局', action:() => createFromNode(nodeId,'ending')},
+          {icon:ICONS.link, label:'连接已有节点', action:() => openConnectExisting({type:'node-linear', nodeId})},
+          {icon:ICONS.ending, label:'连接已有结局', action:() => openConnectExisting({type:'node-ending', nodeId})}
+        ], '节点后续操作');
+      }
+    }
+
+    function openOptionAdjustModal(nodeId, autoAdd=false){
+      state.selectedNodeId = nodeId;
+      state.pendingOptionNodeId = nodeId;
+      if(autoAdd) addOptionToNode(nodeId, true);
+      renderOptionAdjustList();
+      openModal('modalOptionAdjust');
+    }
+
+    function renderOptionAdjustList(){
+      const node = getSelectedNode();
+      const wrap = document.getElementById('optionAdjustList');
+      const meta = document.getElementById('optionAdjustMeta');
+      if(!node || !wrap || !meta) return;
+      meta.textContent = `${node.options.length} 个选项`;
+      wrap.innerHTML = '';
+      if(!node.options.length){
+        wrap.innerHTML = '<div class="alert">当前还没有选项。点击右上角“新增选项”开始。</div>';
+        return;
+      }
+      node.options.forEach((opt, idx) => {
+        const row = document.createElement('div');
+        row.className = 'option-edit-row';
+        row.innerHTML = `
+          <input data-option-text="${idx}" value="${escapeHtml(opt.text || '')}" placeholder="选项${idx + 1}">
+          <button class="mini-icon-btn" data-option-up="${idx}" title="上移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 6L6 12M12 6L18 12M12 6V18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="mini-icon-btn" data-option-down="${idx}" title="下移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 18L6 12M12 18L18 12M12 18V6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button class="mini-icon-btn" data-option-cut="${idx}" title="断开后续"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 8L16 16M16 8L8 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4 12H8M16 12H20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+          <button class="mini-icon-btn" data-option-del="${idx}" title="删除"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+        `;
+        wrap.appendChild(row);
+      });
+
+      wrap.querySelectorAll('[data-option-text]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = Number(e.target.dataset.optionText);
+          if(!node.options[idx]) return;
+          node.options[idx].text = e.target.value;
+          markDirty();
+        });
+      });
+      wrap.querySelectorAll('[data-option-up]').forEach(btn => btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.optionUp);
+        if(idx <= 0) return;
+        pushHistory();
+        [node.options[idx - 1], node.options[idx]] = [node.options[idx], node.options[idx - 1]];
+        markDirty();
+        renderOptionAdjustList();
+        renderEditor();
+      }));
+      wrap.querySelectorAll('[data-option-down]').forEach(btn => btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.optionDown);
+        if(idx >= node.options.length - 1) return;
+        pushHistory();
+        [node.options[idx + 1], node.options[idx]] = [node.options[idx], node.options[idx + 1]];
+        markDirty();
+        renderOptionAdjustList();
+        renderEditor();
+      }));
+      wrap.querySelectorAll('[data-option-cut]').forEach(btn => btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.optionCut);
+        if(!node.options[idx]) return;
+        if(!confirm(`确认断开「${node.options[idx].text || `选项${idx + 1}`}」和后续节点的连接？`)) return;
+        pushHistory();
+        node.options[idx].nextId = null;
+        markDirty();
+        renderOptionAdjustList();
+        renderEditor();
+      }));
+      wrap.querySelectorAll('[data-option-del]').forEach(btn => btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.optionDel);
+        if(!node.options[idx]) return;
+        if(!confirm(`确认删除「${node.options[idx].text || `选项${idx + 1}`}」？`)) return;
+        pushHistory();
+        node.options.splice(idx, 1);
+        markDirty();
+        renderOptionAdjustList();
+        renderEditor();
+      }));
+    }
+
+    function addOptionToNode(nodeId, stayInManager=false){
+      const node = getActiveScript().nodes[nodeId];
+      if(node.kind === 'ending'){ alert('结局节点不能增加选项。'); return false; }
+      if(node.options.length >= 4){ alert('每个节点最多 4 个选项。'); return false; }
+      if(node.linearNext){ alert('当前节点已存在场景后续，若要改为选项节点，请先长按删除已有连线。'); return false; }
+      pushHistory();
+      node.options.push({text:`选项${node.options.length + 1}`, nextId:null});
+      state.selectedNodeId = nodeId;
+      markDirty();
+      renderEditor();
+      if(stayInManager){
+        renderOptionAdjustList();
+      }
+      return true;
+    }
+
+    function createFromNode(nodeId, kind){
+      const s = getActiveScript();
+      const node = s.nodes[nodeId];
+      if(node.kind === 'ending') return;
+      if(node.options.length){ alert('当前节点已经是选项节点，请先编辑选项内容，再将选项连接到后续节点。'); return; }
+      pushHistory();
+      const created = addNodeToScript(s, {
+        title: kind === 'ending' ? '新结局' : '新场景',
+        x: node.x + 420,
+        y: node.y,
+        text: '',
+        kind
+      });
+      node.linearNext = created.id;
+      state.selectedNodeId = created.id;
+      markDirty();
+      renderEditor();
+      focusNode(created.id);
+    }
+
+    function openConnectExisting(payload){
+      state.pendingConnect = payload;
+      const sel = document.getElementById('connectExistingSelect');
+      const exclude = payload.nodeId;
+      const endingsOnly = payload.type === 'node-ending';
+      sel.innerHTML = targetNodeOptions(false, exclude, endingsOnly).map(o => `<option value="${o.value}">${escapeHtml(o.label)}</option>`).join('');
+      const optionWrap = document.getElementById('connectOptionWrap');
+      const optionSel = document.getElementById('connectOptionSelect');
+      if(payload.type === 'option-unfilled'){
+        const node = getActiveScript().nodes[payload.nodeId];
+        const unresolved = node.options.map((opt, idx) => ({idx, text: opt.text || `选项${idx+1}`, linked: !!opt.nextId})).filter(x => !x.linked);
+        if(unresolved.length === 0){
+          alert('当前没有未连接的选项。');
+          return;
+        }
+        optionWrap.classList.remove('hidden');
+        optionSel.disabled = false;
+        optionSel.innerHTML = unresolved.map(x => `<option value="${x.idx}">${escapeHtml(x.text)}</option>`).join('');
+      } else {
+        optionWrap.classList.add('hidden');
+        optionSel.innerHTML = '';
+      }
+      openModal('modalConnectExisting');
+    }
+
+    function connectPendingToExisting(targetId){
+      const s = getActiveScript();
+      const payload = state.pendingConnect;
+      if(!payload || !targetId) return;
+      const node = s.nodes[payload.nodeId];
+      pushHistory();
+      if(payload.type === 'node-linear' || payload.type === 'node-ending') node.linearNext = targetId;
+      else if(payload.type === 'option-unfilled'){
+        const idx = Number(document.getElementById('connectOptionSelect').value);
+        if(Number.isNaN(idx) || !node.options[idx]){ alert('请选择待连接的选项。'); return; }
+        node.options[idx].nextId = targetId;
+      }
+      markDirty();
+      renderEditor();
+    }
+
+    function deleteSelectedNode(){
+      const s = getActiveScript();
+      const node = getSelectedNode();
+      if(!node) return;
+      if(node.id === s.startId){ alert('起始节点不能删除。'); return; }
+      if(!confirm(`确认删除节点 ${node.id}「${node.title || '无标题'}」？`)) return;
+      pushHistory();
+      delete s.nodes[node.id];
+      Object.values(s.nodes).forEach(n => {
+        if(n.linearNext === node.id) n.linearNext = null;
+        n.options = n.options.filter(opt => opt.nextId !== node.id);
+      });
+      Object.values(s.anchors || {}).forEach(a => {
+        if(a.prevRef === node.id) a.prevRef = '';
+        if(a.nextRef === node.id) a.nextRef = '';
+      });
+      state.selectedNodeId = s.startId;
+      markDirty();
+      closeModal();
+      renderEditor();
+    }
+
+    function deleteSelectedAnchor(){
+      const s = getActiveScript();
+      const a = getSelectedAnchor();
+      if(!a) return;
+      if(!confirm(`确认删除锚点 ${a.id}？`)) return;
+      pushHistory();
+      delete s.anchors[a.id];
+      Object.values(s.anchors || {}).forEach(x => {
+        if(x.prevRef === a.id) x.prevRef = '';
+        if(x.nextRef === a.id) x.nextRef = '';
+      });
+      state.selectedAnchorId = null;
+      markDirty();
+      closeModal();
+      renderEditor();
+    }
+
+    function exportProjectJSON(){
+      const script = getActiveScript();
+      download(`${sanitizeFilename(script.name || 'story-project')}.json`, JSON.stringify(script, null, 2), 'application/json;charset=utf-8');
+    }
+
+    function enumerateStorylines(){
+      const v = validateCurrentScript();
+      if(!v.ok) throw new Error('当前结构未通过校验，无法导出。');
+      const script = getActiveScript();
+      const lines = [];
+      const path = [];
+      function dfs(nodeId){
+        const node = script.nodes[nodeId];
+        path.push({type:'node', node:deepCopy(node)});
+        if(node.kind === 'ending'){
+          lines.push(deepCopy(path));
+          path.pop();
+          return;
+        }
+        const outs = getOutgoing(node);
+        outs.forEach(edge => {
+          path.push({type:'choice', label:edge.label});
+          dfs(edge.to);
+          path.pop();
+        });
+        path.pop();
+      }
+      dfs(script.startId);
+      return lines;
+    }
+
+    function storylinesToText(lines){
+      const script = getActiveScript();
+      const parts = [];
+      parts.push(script.name);
+      parts.push('====================');
+      parts.push(`总故事线：${lines.length}`);
+      parts.push('');
+      lines.forEach((line, idx) => {
+        parts.push(`故事线 ${idx + 1}`);
+        parts.push('--------------------');
+        let sceneIndex = 0;
+        line.forEach(item => {
+          if(item.type === 'choice') parts.push(`选择：${item.label}`);
+          else {
+            sceneIndex += 1;
+            parts.push(`第 ${sceneIndex} 幕｜${item.node.id}｜${item.node.title}`);
+            parts.push(item.node.text || '（无内容）');
+            if(item.node.kind === 'ending') parts.push('【结局】');
+            parts.push('');
+          }
+        });
+        parts.push('');
+      });
+      return parts.join('\\n');
+    }
+
+    
+function exportPlayableHTML(){
+      try{
+        const v = validateCurrentScript();
+        if(!v.ok){ alert('请先修复校验问题，再生成HTML游戏。'); return; }
+        const script = deepCopy(getActiveScript());
+        const endings = Object.values(script.nodes).filter(n => n.kind === 'ending').map(n => ({
+          id: String(n.id),
+          title: getNodeDisplayTitle(n, 'export'),
+          text: n.text || ''
+        }));
+        const storyJson = JSON.stringify(script).replace(/<\/script/gi, '<\\/script');
+        const endingsJson = JSON.stringify(endings).replace(/<\/script/gi, '<\\/script');
+        const safeTitle = escapeHtml(script.name || 'HTML游戏');
+        const playable = `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>${safeTitle}</title>
+<style>
+:root{--bg:#f7f7f5;--panel:#ffffff;--text:#111111;--muted:#6b6b6b;--line:rgba(17,17,17,.08);--accent:#549688;--accent-dark:#3f776d;--shadow:0 18px 40px rgba(17,17,17,.08);--key-shadow:0 10px 0 rgba(63,119,109,.22),0 18px 24px rgba(17,17,17,.08)}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fbfbfa,#f3f3f1);color:var(--text)}
+.app{height:100%;display:flex;flex-direction:column}
+.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.mark{width:36px;height:36px;border-radius:14px;background:linear-gradient(180deg,var(--accent),#3e746a);display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 10px 24px rgba(84,150,136,.2)}
+.brand-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{font-size:11px;color:var(--muted)}
+.top-actions{display:flex;gap:10px}
+.icon-btn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);display:grid;place-items:center;box-shadow:0 8px 18px rgba(17,17,17,.06);padding:0}
+.icon-btn svg{width:18px;height:18px;display:block}
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:18px}
+.frame{width:min(860px,100%)}
+.scene-card{height:min(32vh,280px);border-radius:30px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#fafaf8);box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto}
+.scene-card.ending{background:linear-gradient(180deg,rgba(84,150,136,.10),rgba(84,150,136,.04));border-color:rgba(84,150,136,.28)}
+.scene-head{padding:18px 20px 0 20px}
+.scene-title{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:0 0 8px 0;word-break:break-word}
+.scene-title:empty{display:none}
+.scene-progress{font-size:12px;color:var(--muted)}
+.unlock-banner{display:none;align-items:center;gap:10px;margin-top:12px}
+.unlock-banner.show{display:flex}
+.unlock-pill{min-width:auto;height:28px;padding:0 14px;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
+.all-unlocked-note{grid-column:1/-1;padding-top:2px;color:var(--muted);font-size:13px}
+.scene-text{padding:12px 20px 10px 20px;overflow:auto;font-size:15px;line-height:1.8;color:#222;white-space:pre-wrap;word-break:break-word}
+.scene-actions{padding:12px 20px 18px 20px;border-top:1px solid rgba(17,17,17,.06);display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,.72)}
+.choice{width:100%;text-align:left;padding:15px 18px;border-radius:18px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#f2f2ee);color:var(--text);font-size:15px;font-weight:800;box-shadow:0 7px 0 rgba(17,17,17,.08),0 14px 22px rgba(17,17,17,.06);transition:transform .08s ease, box-shadow .08s ease, filter .16s ease, opacity .16s ease}
+.choice:hover{filter:brightness(1.01)}
+.choice:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(17,17,17,.08),0 8px 14px rgba(17,17,17,.06)}
+.choice:disabled{opacity:.82;pointer-events:none}
+.choice.single{background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:var(--key-shadow)}
+.choice.single:active{box-shadow:0 4px 0 rgba(63,119,109,.22),0 10px 14px rgba(17,17,17,.08)}
+.stage-anim{animation:pushIn .42s cubic-bezier(.2,.75,.18,1)}
+.scene-card.leaving{animation:pushOut .22s ease forwards}
+@keyframes pushIn{from{opacity:.16;transform:translateX(28px) scale(.982)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes pushOut{from{opacity:1;transform:translateX(0) scale(1)}to{opacity:.22;transform:translateX(-16px) scale(.988)}}
+.endings-backdrop{position:fixed;inset:0;background:rgba(17,17,17,.18);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
+.endings-backdrop.open{display:flex}
+.endings-modal{width:min(820px,100%);max-height:80vh;overflow:auto;background:#fff;border-radius:28px;border:1px solid rgba(17,17,17,.08);box-shadow:0 24px 60px rgba(17,17,17,.14);padding:18px}
+.sheet-title{font-size:20px;font-weight:800;margin:0 0 6px 0}
+.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+.gallery-section + .gallery-section{margin-top:18px}
+.gallery-heading{font-size:14px;font-weight:800;margin-bottom:10px}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.locked-gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.ending-card{border:1px solid rgba(17,17,17,.08);border-radius:22px;background:#fff;color:var(--text)}
+.ending-card.unlocked{padding:16px;background:linear-gradient(180deg,rgba(84,150,136,.10),rgba(84,150,136,.04));border-color:rgba(84,150,136,.28);align-self:start}
+.ending-card.locked{aspect-ratio:1/1;min-height:0;display:flex;align-items:center;justify-content:center;background:#f6f6f4;padding:0}
+.ending-card.locked .q{font-size:34px;color:#9aa0a8;font-weight:900}
+.ending-title{font-size:16px;font-weight:800;line-height:1.35;word-break:break-word;margin-bottom:10px}
+.ending-text{font-size:13px;line-height:1.75;color:#444;white-space:pre-wrap;word-break:break-word}
+.empty-gallery{border:1px dashed rgba(17,17,17,.12);border-radius:18px;padding:14px 16px;color:var(--muted);font-size:13px;background:#fafaf8}
+.empty-gallery.done{text-align:center}
+@media (max-width:720px){.main{padding:14px}.scene-card{height:calc(100vh - 180px)}.scene-title{font-size:22px}.scene-text{font-size:15px}.scene-actions{padding:12px 16px 16px 16px}.scene-head{padding:16px 16px 0 16px}.scene-text{padding:12px 16px 8px 16px}.locked-gallery{gap:10px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="mark">B</div>
+      <div><div class="brand-title">${safeTitle}</div><div class="brand-sub">文字游戏</div></div>
+    </div>
+    <div class="top-actions">
+      <button class="icon-btn" id="galleryBtn" title="结局图鉴"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="13" y="5" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="5" y="13" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/></svg></button>
+      <button class="icon-btn" id="restartBtn" title="重新开始"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12A9 9 0 0 1 17.6 5.2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M17 2V6H13" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12A9 9 0 0 1 6.4 18.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M7 22V18H11" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="frame">
+      <div class="scene-card stage-anim" id="sceneCard">
+        <div class="scene-head">
+          <div class="scene-title" id="sceneTitle"></div>
+          <div class="scene-progress" id="progress"></div>
+          <div class="unlock-banner" id="unlockBanner">
+            <div class="unlock-pill">新解锁</div>
+          </div>
+        </div>
+        <div class="scene-text" id="sceneText"></div>
+        <div class="scene-actions" id="choices"></div>
+      </div>
+    </div>
+  </div>
+  <div class="endings-backdrop" id="endingsBackdrop">
+    <div class="endings-modal">
+      <div class="sheet-title">结局图鉴</div>
+      <div class="gallery-section">
+        <div class="gallery-heading" id="unlockedHeading">已解锁结局</div>
+        <div class="gallery" id="unlockedEndingGallery"></div>
+      </div>
+      <div class="gallery-section">
+        <div class="gallery-heading" id="lockedHeading">未解锁结局</div>
+        <div class="locked-gallery" id="lockedEndingGallery"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script id="story-data" type="application/json">${storyJson}<\/script>
+<script id="ending-data" type="application/json">${endingsJson}<\/script>
+<script>
+const story = JSON.parse(document.getElementById('story-data').textContent);
+const allEndings = JSON.parse(document.getElementById('ending-data').textContent);
+const ENDING_KEY = 'ending-gallery-' + (story.name || 'story');
+let currentId = String(story.startId);
+let stepCount = 1;
+let unlocked = loadUnlocked();
+let isTransitioning = false;
+function getDisplayTitle(node){
+  const enabled = node.titleEnabled !== false;
+  const raw = (node.title || '').trim();
+  if(!enabled) return '';
+  return raw || ('独立节点' + node.id);
+}
+function getOutgoing(node){
+  if(node.options && node.options.length){
+    return node.options.map((opt, idx) => ({label: opt.text || ('选项' + (idx + 1)), to: opt.nextId != null ? String(opt.nextId) : ''})).filter(x => x.to && story.nodes[x.to]);
+  }
+  return node.linearNext != null && story.nodes[String(node.linearNext)] ? [{label:'继续', to:String(node.linearNext)}] : [];
+}
+function loadUnlocked(){ try{ return JSON.parse(localStorage.getItem(ENDING_KEY) || '[]'); }catch(e){ return []; } }
+function saveUnlocked(){ localStorage.setItem(ENDING_KEY, JSON.stringify(unlocked)); }
+function renderGallery(){
+  const unlockedWrap = document.getElementById('unlockedEndingGallery');
+  const lockedWrap = document.getElementById('lockedEndingGallery');
+  unlockedWrap.innerHTML = '';
+  lockedWrap.innerHTML = '';
+  let unlockedCount = 0;
+  let lockedCount = 0;
+  allEndings.forEach(item => {
+    const ok = unlocked.includes(item.id);
+    const card = document.createElement('div');
+    card.className = 'ending-card ' + (ok ? 'unlocked' : 'locked');
+    if(ok){
+      unlockedCount += 1;
+      card.innerHTML = '<div class="ending-title"></div><div class="ending-text"></div>';
+      card.querySelector('.ending-title').textContent = item.title || '未命名结局';
+      card.querySelector('.ending-text').textContent = item.text || '（无文字）';
+      unlockedWrap.appendChild(card);
+    }else{
+      lockedCount += 1;
+      card.innerHTML = '<div class="q">?</div>';
+      lockedWrap.appendChild(card);
+    }
+  });
+  if(!unlockedCount){
+    unlockedWrap.innerHTML = '<div class="empty-gallery">尚未解锁任何结局。</div>';
+  }
+  if(!lockedCount){
+    lockedWrap.innerHTML = '<div class="all-unlocked-note">已解锁所有结局</div>';
+  }
+  document.getElementById('unlockedHeading').textContent = '已解锁结局 · ' + unlockedCount;
+  document.getElementById('lockedHeading').textContent = '未解锁结局 · ' + lockedCount;
+}
+function animateCard(){
+  const card = document.getElementById('sceneCard');
+  card.classList.remove('leaving');
+  card.classList.remove('stage-anim');
+  void card.offsetWidth;
+  card.classList.add('stage-anim');
+}
+function setChoiceState(disabled){
+  document.querySelectorAll('#choices .choice').forEach(btn => { btn.disabled = disabled; });
+}
+function transitionTo(nextId){
+  if(isTransitioning) return;
+  isTransitioning = true;
+  setChoiceState(true);
+  const card = document.getElementById('sceneCard');
+  card.classList.remove('stage-anim');
+  card.classList.add('leaving');
+  setTimeout(() => {
+    currentId = String(nextId);
+    stepCount += 1;
+    card.classList.remove('leaving');
+    render();
+    isTransitioning = false;
+  }, 220);
+}
+function render(){
+  const node = story.nodes[currentId];
+  const titleEl = document.getElementById('sceneTitle');
+  const textEl = document.getElementById('sceneText');
+  const progressEl = document.getElementById('progress');
+  const wrap = document.getElementById('choices');
+  const unlockBanner = document.getElementById('unlockBanner');
+  wrap.innerHTML = '';
+  unlockBanner.classList.remove('show');
+  if(!node){
+    titleEl.textContent = '无法找到起点';
+    textEl.textContent = '故事数据异常。';
+    progressEl.textContent = '';
+    return;
+  }
+  const outs = getOutgoing(node);
+  let justUnlocked = false;
+  if(node.kind === 'ending' && !unlocked.includes(String(node.id))){
+    unlocked.push(String(node.id));
+    saveUnlocked();
+    justUnlocked = true;
+  }
+  titleEl.textContent = getDisplayTitle(node);
+  textEl.textContent = node.text || '（无内容）';
+  progressEl.textContent = '当前节点：' + node.id + ' · 已推进 ' + stepCount + ' 幕';
+  document.getElementById('sceneCard').classList.toggle('ending', node.kind === 'ending');
+  if(justUnlocked){
+    unlockBanner.classList.add('show');
+  }
+  animateCard();
+  if(node.kind === 'ending'){
+    const done = document.createElement('button');
+    done.className = 'choice';
+    done.textContent = '已抵达结局 · 重新开始';
+    done.onclick = restart;
+    wrap.appendChild(done);
+    renderGallery();
+    return;
+  }
+  outs.forEach(edge => {
+    const btn = document.createElement('button');
+    btn.className = 'choice' + (outs.length === 1 ? ' single' : '');
+    btn.textContent = edge.label;
+    btn.onclick = () => { transitionTo(edge.to); };
+    wrap.appendChild(btn);
+  });
+}
+function restart(){ currentId = String(story.startId); stepCount = 1; render(); }
+document.getElementById('restartBtn').addEventListener('click', restart);
+document.getElementById('galleryBtn').addEventListener('click', () => {
+  renderGallery();
+  document.getElementById('endingsBackdrop').classList.add('open');
+});
+document.getElementById('endingsBackdrop').addEventListener('click', (e) => {
+  if(e.target.id === 'endingsBackdrop') document.getElementById('endingsBackdrop').classList.remove('open');
+});
+render();
+<\/script>
+</body>
+</html>`;
+        download(`${sanitizeFilename(script.name || 'playable-story')}.html`, playable, 'text/html;charset=utf-8', true);
+      }catch(err){
+        alert('生成 HTML 失败：' + (err && err.message ? err.message : String(err)));
+      }
+    }
+
+        function download(filename, content, type='text/plain;charset=utf-8', notify=false){
+      const blob = new Blob([content], {type});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+      if(notify){
+        alert('HTML 已开始下载：' + filename);
+      }
+    }
+
+    function importProject(text){
+      try{
+        const parsed = JSON.parse(text);
+        if(!parsed.id) parsed.id = 'script_' + Math.random().toString(36).slice(2,10);
+        if(!parsed.name) parsed.name = '导入剧本';
+        if(!parsed.updatedAt) parsed.updatedAt = now();
+        if(!parsed.createdAt) parsed.createdAt = now();
+        const convertedNodes = {};
+        let maxNum = 0;
+        Object.values(parsed.nodes || {}).forEach((n, idx) => {
+          const num = String(n.id).replace(/[^\d]/g,'') || String(idx+1);
+          maxNum = Math.max(maxNum, Number(num));
+          convertedNodes[String(num)] = {
+            id:String(num), title:n.title || '未命名节点', text:n.text || '', kind:n.kind || 'scene',
+            x:n.x || 0, y:n.y || 0, linearNext:n.linearNext ? String(n.linearNext).replace(/[^\d]/g,'') : null,
+            options:(n.options || []).map(o => ({text:o.text || '', nextId:o.nextId ? String(o.nextId).replace(/[^\d]/g,'') : null})),
+            locked:!!n.locked,
+            titleEnabled: typeof n.titleEnabled === 'undefined' ? true : !!n.titleEnabled
+          };
+        });
+        parsed.nodes = convertedNodes;
+        parsed.anchors = parsed.anchors || {};
+        normalizeScript(parsed);
+        parsed.startId = parsed.startId ? String(parsed.startId).replace(/[^\d]/g,'') : '1';
+        parsed.nodeCounter = Math.max(parsed.nodeCounter || 0, maxNum);
+        parsed.anchorCounter = parsed.anchorCounter || Object.keys(parsed.anchors || {}).length;
+        state.library.scripts.unshift(parsed);
+        state.library.activeScriptId = parsed.id;
+        state.selectedNodeId = parsed.startId || Object.keys(parsed.nodes || {})[0] || null;
+        state.selectedAnchorId = null;
+        state.validation = null;
+        markDirty();
+        switchPage('editor');
+        setDefaultView();
+        renderEditor();
+      } catch(e){
+        alert('导入失败，文件内容不是有效的工程 JSON。');
+      }
+    }
+
+    document.getElementById('homeSearchInput').addEventListener('input', (e) => { state.search = e.target.value; renderHome(); });
+    document.getElementById('homeSearchToggleBtn').addEventListener('click', () => { setHomeSearchMode(true); });
+    document.getElementById('homeSearchBackBtn').addEventListener('click', () => { setHomeSearchMode(false); });
+    document.getElementById('homeNewScriptBtn').addEventListener('click', () => {
+      const name = prompt('新剧本名称', '新的剧本');
+      if(name === null) return;
+      const script = createBlankScript(name || '新的剧本');
+      state.library.scripts.unshift(script);
+      state.library.activeScriptId = script.id;
+      state.selectedNodeId = script.startId;
+      state.validation = null;
+      markDirty(); renderHome();
+    });
+
+    document.getElementById('backHomeBtn').addEventListener('click', () => {
+      switchPage('home'); renderHome(); settingsPanel.classList.remove('open'); closeActionSheet();
+    });
+    document.getElementById('newFreeNodeBtn').addEventListener('click', () => {
+      const s = getActiveScript();
+      const center = currentViewportWorldCenter();
+      pushHistory();
+      const created = addNodeToScript(s, {
+        title:'独立节点',
+        x: Math.max(80, center.x - (window.innerWidth <= 860 ? 127 : 146)),
+        y: Math.max(80, center.y - 90),
+        text:''
+      });
+      state.selectedNodeId = created.id;
+      state.selectedAnchorId = null;
+      markDirty(); renderEditor();
+    });
+    document.getElementById('newAnchorBtn').addEventListener('click', () => {
+      const s = getActiveScript();
+      const center = currentViewportWorldCenter();
+      pushHistory();
+      const created = addAnchorToScript(s, {x: center.x, y: center.y});
+      state.selectedAnchorId = created.id;
+      state.selectedNodeId = null;
+      markDirty(); renderEditor();
+    });
+
+    document.getElementById('textEditorBtn').addEventListener('click', () => { const screen = document.getElementById('textEditorScreen'); if(screen.classList.contains('open')){ closeTextEditor(); renderEditor(); } else { openTextEditor(); } });
+    document.getElementById('textEditorCloseBtn').addEventListener('click', () => { closeTextEditor(); renderEditor(); });
+    document.getElementById('textEditorNodeSwitch').addEventListener('change', (e) => { syncTextEditorFromNode(e.target.value); });
+    document.getElementById('textEditorTitleInput').addEventListener('input', (e) => {
+      const n = getActiveScript().nodes[document.getElementById('textEditorNodeSwitch').value];
+      if(!n || n.titleEnabled === false) return;
+      n.title = e.target.value.trim();
+      markDirty();
+      renderEditor();
+    });
+    document.getElementById('textEditorBodyInput').addEventListener('input', (e) => {
+      const n = getActiveScript().nodes[document.getElementById('textEditorNodeSwitch').value];
+      if(!n) return;
+      n.text = e.target.value;
+      markDirty();
+      refreshAiUndoButton('text');
+    });
+    document.getElementById('textEditorClearTitleBtn').addEventListener('click', () => {
+      const n = getActiveScript().nodes[document.getElementById('textEditorNodeSwitch').value];
+      if(!n) return;
+      pushHistory();
+      if(n.titleEnabled === false){
+        n.titleEnabled = true;
+        n.title = '';
+      }else{
+        n.titleEnabled = false;
+        n.title = '';
+      }
+      document.getElementById('textEditorTitleInput').value = n.title || '';
+      syncTextEditorFromNode(n.id);
+      markDirty();
+      renderEditor();
+    });
+    document.getElementById('modalAiBtn').addEventListener('click', () => { runAiExpand('modal', false); });
+    document.getElementById('modalAiRegenerateBtn').addEventListener('click', () => { runAiExpand('modal', true); });
+    document.getElementById('modalAiUndoBtn').addEventListener('click', () => { undoAiExpand('modal'); });
+    document.getElementById('modalAiRefBtn').addEventListener('click', () => { toggleAiReference('modal'); });
+    document.getElementById('modalAiRefSelect').addEventListener('change', (e) => { ensureAiRefPref('modal').source = e.target.value; });
+    document.getElementById('modalAiClearBtn').addEventListener('click', () => { clearAiEditorText('modal'); });
+
+    document.getElementById('textEditorAiBtn').addEventListener('click', () => { runAiExpand('text', false); });
+    document.getElementById('textEditorAiRegenerateBtn').addEventListener('click', () => { runAiExpand('text', true); });
+    document.getElementById('textEditorAiUndoBtn').addEventListener('click', () => { undoAiExpand('text'); });
+    document.getElementById('textEditorAiRefBtn').addEventListener('click', () => { toggleAiReference('text'); });
+    document.getElementById('textEditorAiRefSelect').addEventListener('change', (e) => { ensureAiRefPref('text').source = e.target.value; });
+    document.getElementById('textEditorAiClearBtn').addEventListener('click', () => { clearAiEditorText('text'); });
+
+    document.getElementById('settingsBtn').addEventListener('click', (e) => { e.stopPropagation(); settingsPanel.classList.toggle('open'); });
+    window.addEventListener('click', (e) => {
+      if(!e.target.closest('#settingsPanel') && !e.target.closest('#settingsBtn')) settingsPanel.classList.remove('open');
+    });
+
+    document.getElementById('settingsValidateBtn').addEventListener('click', () => { validateCurrentScript(); renderValidationModal(); openModal('modalValidation'); settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsExportTxtBtn').addEventListener('click', () => { try{ const txt = storylinesToText(enumerateStorylines()); download(`${sanitizeFilename(getActiveScript().name || 'story-lines')}.txt`, txt); }catch(e){ alert(e.message); } settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsExportGameBtn').addEventListener('click', () => { exportPlayableHTML(); settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsAiApiBtn').addEventListener('click', () => { openAiSettingsModal(); settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsAiProfileBtn').addEventListener('click', () => { openAiProfileModal(); settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsExportProjectBtn').addEventListener('click', () => { exportProjectJSON(); settingsPanel.classList.remove('open'); });
+    document.getElementById('settingsImportProjectBtn').addEventListener('click', () => { document.getElementById('fileInput').click(); settingsPanel.classList.remove('open'); });
+    document.getElementById('fileInput').addEventListener('change', async (e) => { const file = e.target.files[0]; if(!file) return; const text = await file.text(); importProject(text); e.target.value = ''; });
+
+    document.getElementById('zoomInBtn').addEventListener('click', () => { state.view.scale = clamp(state.view.scale + 0.12, 0.14, 1.7); applyWorldTransform(); });
+    document.getElementById('zoomOutBtn').addEventListener('click', () => { state.view.scale = clamp(state.view.scale - 0.12, 0.14, 1.7); applyWorldTransform(); });
+    document.getElementById('undoBtn').addEventListener('click', () => { undoLastChange(); });
+    document.getElementById('focusStartBtn').addEventListener('click', () => {
+      const s = getActiveScript();
+      if(!s || !s.startId || !s.nodes[s.startId]) return;
+      state.selectedNodeId = s.startId;
+      state.selectedAnchorId = null;
+      renderEditor();
+      focusNode(s.startId);
+    });
+
+    document.getElementById('modalNodeText').addEventListener('input', (e) => { document.getElementById('modalTextCount').textContent = `字数：${e.target.value.length}`; refreshAiUndoButton('modal'); });
+    document.getElementById('modalClearTitle').addEventListener('click', () => {
+      const node = getSelectedNode();
+      if(!node) return;
+      if(node.titleEnabled === false){
+        node.titleEnabled = true;
+      }else{
+        node.titleEnabled = false;
+        document.getElementById('modalNodeTitle').value = '';
+      }
+      syncTitleToggleButtons(node);
+    });
+    document.getElementById('modalNodeCancel').addEventListener('click', closeModal);
+    document.getElementById('modalNodeSave').addEventListener('click', () => {
+      const node = getSelectedNode();
+      pushHistory();
+      node.title = node.titleEnabled === false ? '' : document.getElementById('modalNodeTitle').value.trim();
+      node.text = document.getElementById('modalNodeText').value;
+      node.kind = document.getElementById('modalNodeKind').value;
+      node.x = Number(document.getElementById('modalPosX').value) || 0;
+      node.y = Number(document.getElementById('modalPosY').value) || 0;
+      if(node.kind === 'ending'){ node.linearNext = null; node.options = []; }
+      markDirty(); closeModal(); renderEditor();
+    });
+
+    document.getElementById('connectExistingCancel').addEventListener('click', closeModal);
+    document.getElementById('connectExistingConfirm').addEventListener('click', () => {
+      const val = document.getElementById('connectExistingSelect').value;
+      if(!val){ alert('请选择一个目标节点。'); return; }
+      connectPendingToExisting(val);
+      closeModal();
+    });
+
+    document.getElementById('optionAdjustAddBtn').addEventListener('click', () => {
+      const nodeId = state.pendingOptionNodeId || state.selectedNodeId;
+      if(!nodeId) return;
+      addOptionToNode(nodeId, true);
+    });
+    document.getElementById('optionAdjustClose').addEventListener('click', () => {
+      state.pendingOptionNodeId = null;
+      closeModal();
+    });
+
+    document.getElementById('anchorDeleteBtn').addEventListener('click', deleteSelectedAnchor);
+    document.getElementById('anchorEditCancel').addEventListener('click', closeModal);
+    document.getElementById('anchorToggleLockBtn').addEventListener('click', () => {
+      const a = getSelectedAnchor();
+      pushHistory();
+      a.locked = !a.locked;
+      document.getElementById('anchorToggleLockBtn').textContent = a.locked ? '取消固定' : '固定锚点';
+    });
+    document.getElementById('anchorEditSave').addEventListener('click', () => {
+      const a = getSelectedAnchor();
+      pushHistory();
+      a.prevRef = document.getElementById('anchorPrevInput').value.trim();
+      a.nextRef = document.getElementById('anchorNextInput').value.trim();
+      markDirty(); closeModal(); renderEditor();
+    });
+
+    document.getElementById('aiProviderSelect').addEventListener('change', (e) => {
+      maybeApplyAiProviderDefaults(e.target.value);
+      setAiStatus(document.getElementById('aiSettingsTestStatus'), '');
+    });
+    document.getElementById('aiSettingsCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('aiSettingsSaveBtn').addEventListener('click', () => {
+      state.aiSettings = readAiSettingsForm();
+      saveAiSettings();
+      setAiStatus(document.getElementById('aiSettingsTestStatus'), '已保存', 'success');
+    });
+    document.getElementById('aiSettingsTestBtn').addEventListener('click', async () => {
+      state.aiSettings = readAiSettingsForm();
+      saveAiSettings();
+      const statusEl = document.getElementById('aiSettingsTestStatus');
+      setAiStatus(statusEl, '连接测试中…');
+      const btn = document.getElementById('aiSettingsTestBtn');
+      btn.disabled = true;
+      try{
+        await requestAiText(state.aiSettings, '测试连接', true);
+        setAiStatus(statusEl, '连接成功', 'success');
+      }catch(err){
+        setAiStatus(statusEl, `连接失败：${err.message || err}`, 'error');
+      }finally{
+        btn.disabled = false;
+      }
+    });
+    document.getElementById('aiProfileCloseBtn').addEventListener('click', closeModal);
+    document.getElementById('aiAddCharacterBtn').addEventListener('click', () => { addAiCharacterCard(); });
+    document.getElementById('aiProfileSaveBtn').addEventListener('click', () => {
+      state.aiSettings = readAiProfileForm();
+      saveAiSettings();
+      setAiStatus(document.getElementById('aiProfileStatus'), '已保存', 'success');
+    });
+
+    document.getElementById('modalValidationClose').addEventListener('click', closeModal);
+    modalBackdrop.addEventListener('click', (e) => { if(e.target === modalBackdrop) closeModal(); });
+
+    sheetBackdrop.addEventListener('click', (e) => { if(e.target === sheetBackdrop) closeActionSheet(); });
+
+    viewport.addEventListener('click', (e) => {
+      if(e.target === viewport || e.target === world){ state.selectedNodeId = null; state.selectedAnchorId = null; renderEditor(); }
+    });
+
+    function distance(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+    function midpoint(a,b){ return {x:(a.x+b.x)/2, y:(a.y+b.y)/2}; }
+
+    viewport.addEventListener('pointerdown', (e) => {
+      if(e.target.closest('.node') || e.target.closest('.anchor') || e.target.closest('.edge-hit')) return;
+      state.pointerCache.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      viewport.setPointerCapture?.(e.pointerId);
+      if(state.pointerCache.size === 1){
+        state.gesture = {type:'pan', startX:e.clientX, startY:e.clientY, baseX:state.view.x, baseY:state.view.y};
+      } else if(state.pointerCache.size === 2){
+        const pts = [...state.pointerCache.values()];
+        state.gesture = {type:'pinch', startDist: distance(pts[0], pts[1]), startScale: state.view.scale};
+      }
+    });
+    viewport.addEventListener('pointermove', (e) => {
+      if(!state.pointerCache.has(e.pointerId)) return;
+      state.pointerCache.set(e.pointerId, {x:e.clientX, y:e.clientY});
+      if(state.gesture?.type === 'pan' && state.pointerCache.size === 1){
+        const p = state.pointerCache.get(e.pointerId);
+        state.view.x = state.gesture.baseX + (p.x - state.gesture.startX);
+        state.view.y = state.gesture.baseY + (p.y - state.gesture.startY);
+        applyWorldTransform();
+      } else if(state.pointerCache.size === 2){
+        const pts = [...state.pointerCache.values()];
+        const mid = midpoint(pts[0], pts[1]);
+        const newDist = distance(pts[0], pts[1]);
+        const nextScale = clamp(state.gesture.startScale * (newDist / state.gesture.startDist), 0.14, 1.7);
+        const worldMidX = (mid.x - state.view.x) / state.view.scale;
+        const worldMidY = (mid.y - state.view.y) / state.view.scale;
+        state.view.scale = nextScale;
+        state.view.x = mid.x - worldMidX * state.view.scale;
+        state.view.y = mid.y - worldMidY * state.view.scale;
+        applyWorldTransform();
+      }
+    });
+    function endPointer(e){
+      state.pointerCache.delete(e.pointerId);
+      if(state.pointerCache.size === 0) state.gesture = null;
+      else if(state.pointerCache.size === 1){
+        const p = [...state.pointerCache.values()][0];
+        state.gesture = {type:'pan', startX:p.x, startY:p.y, baseX:state.view.x, baseY:state.view.y};
+      }
+    }
+    viewport.addEventListener('pointerup', endPointer);
+    viewport.addEventListener('pointercancel', endPointer);
+    window.addEventListener('resize', () => { applyWorldTransform(); });
+
+    loadLibrary();
+    refreshAllAiControls();
+    switchPage('home');
+    renderHome();
+  </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
