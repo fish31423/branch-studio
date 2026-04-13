@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Branch Studio Pro</title>
+  <title>Branch Studio Pro 1.2</title>
   <style>
     :root{
       --bg:#f7f7f5;
@@ -287,7 +287,9 @@
     #modalNodeText{min-height:98px;height:98px;resize:none}
     .option-adjust-list{display:flex;flex-direction:column;gap:8px}
     .option-adjust-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
-    .option-edit-row{display:grid;grid-template-columns:minmax(0,1fr) 28px 28px 28px 28px;gap:6px;align-items:center}
+    .option-adjust-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .option-edit-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}
+    .option-edit-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
     .mini-icon-btn{width:28px;height:28px;border-radius:10px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;padding:0}
     .mini-icon-btn .svg-ico{width:13px;height:13px}
     #modalOptionAdjust{width:min(760px,96vw);max-height:min(72vh,560px);overflow:hidden}
@@ -583,28 +585,36 @@
 
       <div class="modal hidden" id="modalOptionAdjust">
         <h3>调整选项</h3>
-        <div class="modal-sub">在这里统一新增、排序、断开或删除选项，再按需连接到已有节点。</div>
+        <div class="modal-sub">在这里先统一修改选项内容。默认只显示断开后续节点和删除选项；点击“调整顺序”后会切换为上下箭头模式，最后在底部统一保存全部修改。</div>
         <div class="stack">
           <div class="option-adjust-head">
             <div class="mini" id="optionAdjustMeta">0 个选项</div>
-            <button class="text-btn cta sm" id="optionAdjustAddBtn">新增选项</button>
+            <div class="option-adjust-tools">
+              <button class="text-btn sm" id="optionAdjustOrderBtn">调整顺序</button>
+              <button class="text-btn cta sm" id="optionAdjustAddBtn">新增选项</button>
+            </div>
           </div>
           <div class="option-adjust-list" id="optionAdjustList"></div>
           <div class="row">
             <button class="text-btn" id="optionAdjustClose">关闭</button>
+            <button class="text-btn cta" id="optionAdjustSave">保存</button>
           </div>
         </div>
       </div>
 
       <div class="modal sm hidden" id="modalConnectExisting">
-        <h3>连接到已有节点</h3>
-        <div class="modal-sub">为当前节点或当前分支选择一个已存在的目标节点。</div>
+        <h3 id="connectExistingTitle">连接到已有节点</h3>
+        <div class="modal-sub" id="connectExistingSub">为当前节点或当前分支选择一个已存在的目标节点。</div>
         <div class="stack">
           <div id="connectOptionWrap" class="hidden">
             <div class="field-label">待连接选项</div>
             <select id="connectOptionSelect"></select>
           </div>
           <select id="connectExistingSelect"></select>
+          <div class="row hidden" id="connectCreateRow">
+            <button class="text-btn" id="connectCreateSceneBtn">新建独立节点</button>
+            <button class="text-btn" id="connectCreateEndingBtn">新建结局</button>
+          </div>
           <div class="row">
             <button class="text-btn" id="connectExistingCancel">取消</button>
             <button class="text-btn cta" id="connectExistingConfirm">连接</button>
@@ -732,6 +742,7 @@
       search: '',
       homeSearchOpen: false,
       pendingOptionNodeId: null,
+      optionAdjustDraft: null,
       validation: null,
       view: {x: 80, y: 140, scale: 0.78},
       pointerCache: new Map(),
@@ -2373,6 +2384,10 @@ function bindEdgeDeleteLongPress(pathEl){
       });
     }
     function closeModal(){
+      if(state.activeModal === 'modalOptionAdjust'){
+        state.optionAdjustDraft = null;
+        state.pendingOptionNodeId = null;
+      }
       state.activeModal = null;
       modalBackdrop.classList.remove('open');
       ['modalNodeEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => document.getElementById(mid).classList.add('hidden'));
@@ -2476,7 +2491,7 @@ function openNodeEditModal(){
       if(node.options.length){
         openActionSheet([
           {icon:ICONS.option, label:'调整选项', action:() => openOptionAdjustModal(nodeId)},
-          {icon:ICONS.link, label:'连接已有节点', action:() => openConnectExisting({type:'option-unfilled', nodeId})}
+          {icon:ICONS.link, label:'连接已有选项', action:() => openConnectExisting({type:'option-unfilled', nodeId})}
         ], '选项节点操作');
       } else {
         openActionSheet([
@@ -2489,34 +2504,66 @@ function openNodeEditModal(){
       }
     }
 
+    function createOptionAdjustDraft(node){
+      return {
+        nodeId: node.id,
+        options: deepCopy(node.options || []),
+        reorderMode: false
+      };
+    }
+
+    function getOptionAdjustDraft(nodeId=null){
+      const targetId = nodeId || state.pendingOptionNodeId || state.selectedNodeId;
+      if(!targetId) return null;
+      if(!state.optionAdjustDraft || state.optionAdjustDraft.nodeId !== targetId){
+        const node = getActiveScript()?.nodes?.[targetId];
+        if(!node) return null;
+        state.optionAdjustDraft = createOptionAdjustDraft(node);
+      }
+      return state.optionAdjustDraft;
+    }
+
     function openOptionAdjustModal(nodeId, autoAdd=false){
       state.selectedNodeId = nodeId;
       state.pendingOptionNodeId = nodeId;
-      if(autoAdd) addOptionToNode(nodeId, true);
+      state.optionAdjustDraft = createOptionAdjustDraft(getActiveScript().nodes[nodeId]);
+      if(autoAdd){
+        const added = addOptionToNode(nodeId, false);
+        if(!added) return;
+      }
       renderOptionAdjustList();
       openModal('modalOptionAdjust');
     }
 
     function renderOptionAdjustList(){
       const node = getSelectedNode();
+      const draft = getOptionAdjustDraft(node?.id);
       const wrap = document.getElementById('optionAdjustList');
       const meta = document.getElementById('optionAdjustMeta');
-      if(!node || !wrap || !meta) return;
-      meta.textContent = `${node.options.length} 个选项`;
+      const orderBtn = document.getElementById('optionAdjustOrderBtn');
+      if(!node || !draft || !wrap || !meta || !orderBtn) return;
+      meta.textContent = `${draft.options.length} 个选项${draft.reorderMode ? ' · 调整顺序中' : ''}`;
+      orderBtn.textContent = draft.reorderMode ? '结束调整' : '调整顺序';
       wrap.innerHTML = '';
-      if(!node.options.length){
+      if(!draft.options.length){
         wrap.innerHTML = '<div class="alert">当前还没有选项。点击右上角“新增选项”开始。</div>';
         return;
       }
-      node.options.forEach((opt, idx) => {
+      draft.options.forEach((opt, idx) => {
         const row = document.createElement('div');
         row.className = 'option-edit-row';
+        const actionHtml = draft.reorderMode
+          ? `
+            <button class="mini-icon-btn" data-option-up="${idx}" title="上移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 6L6 12M12 6L18 12M12 6V18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="mini-icon-btn" data-option-down="${idx}" title="下移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 18L6 12M12 18L18 12M12 18V6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          `
+          : `
+            <button class="mini-icon-btn" data-option-cut="${idx}" title="断开后续"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 8L16 16M16 8L8 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4 12H8M16 12H20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+            <button class="mini-icon-btn" data-option-del="${idx}" title="删除"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+          `;
         row.innerHTML = `
           <input data-option-text="${idx}" value="${escapeHtml(opt.text || '')}" placeholder="选项${idx + 1}">
-          <button class="mini-icon-btn" data-option-up="${idx}" title="上移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 6L6 12M12 6L18 12M12 6V18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button class="mini-icon-btn" data-option-down="${idx}" title="下移"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M12 18L6 12M12 18L18 12M12 18V6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-          <button class="mini-icon-btn" data-option-cut="${idx}" title="断开后续"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 8L16 16M16 8L8 16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M4 12H8M16 12H20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
-          <button class="mini-icon-btn" data-option-del="${idx}" title="删除"><svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>
+          <div class="option-edit-actions">${actionHtml}</div>
         `;
         wrap.appendChild(row);
       });
@@ -2524,61 +2571,68 @@ function openNodeEditModal(){
       wrap.querySelectorAll('[data-option-text]').forEach(input => {
         input.addEventListener('input', (e) => {
           const idx = Number(e.target.dataset.optionText);
-          if(!node.options[idx]) return;
-          node.options[idx].text = e.target.value;
-          markDirty();
+          if(!draft.options[idx]) return;
+          draft.options[idx].text = e.target.value;
         });
       });
       wrap.querySelectorAll('[data-option-up]').forEach(btn => btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.optionUp);
         if(idx <= 0) return;
-        pushHistory();
-        [node.options[idx - 1], node.options[idx]] = [node.options[idx], node.options[idx - 1]];
-        markDirty();
+        [draft.options[idx - 1], draft.options[idx]] = [draft.options[idx], draft.options[idx - 1]];
         renderOptionAdjustList();
-        renderEditor();
       }));
       wrap.querySelectorAll('[data-option-down]').forEach(btn => btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.optionDown);
-        if(idx >= node.options.length - 1) return;
-        pushHistory();
-        [node.options[idx + 1], node.options[idx]] = [node.options[idx], node.options[idx + 1]];
-        markDirty();
+        if(idx >= draft.options.length - 1) return;
+        [draft.options[idx + 1], draft.options[idx]] = [draft.options[idx], draft.options[idx + 1]];
         renderOptionAdjustList();
-        renderEditor();
       }));
       wrap.querySelectorAll('[data-option-cut]').forEach(btn => btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.optionCut);
-        if(!node.options[idx]) return;
-        if(!confirm(`确认断开「${node.options[idx].text || `选项${idx + 1}`}」和后续节点的连接？`)) return;
-        pushHistory();
-        node.options[idx].nextId = null;
-        markDirty();
+        if(!draft.options[idx]) return;
+        if(!confirm(`确认断开「${draft.options[idx].text || `选项${idx + 1}`}」和后续节点的连接？`)) return;
+        draft.options[idx].nextId = null;
         renderOptionAdjustList();
-        renderEditor();
       }));
       wrap.querySelectorAll('[data-option-del]').forEach(btn => btn.addEventListener('click', () => {
         const idx = Number(btn.dataset.optionDel);
-        if(!node.options[idx]) return;
-        if(!confirm(`确认删除「${node.options[idx].text || `选项${idx + 1}`}」？`)) return;
-        pushHistory();
-        node.options.splice(idx, 1);
-        markDirty();
+        if(!draft.options[idx]) return;
+        if(!confirm(`确认删除「${draft.options[idx].text || `选项${idx + 1}`}」？`)) return;
+        draft.options.splice(idx, 1);
         renderOptionAdjustList();
-        renderEditor();
       }));
+    }
+
+    function toggleOptionAdjustMode(){
+      const draft = getOptionAdjustDraft();
+      if(!draft) return;
+      draft.reorderMode = !draft.reorderMode;
+      renderOptionAdjustList();
+    }
+
+    function saveOptionAdjustDraft(){
+      const node = getSelectedNode();
+      const draft = getOptionAdjustDraft(node?.id);
+      if(!node || !draft) return;
+      pushHistory();
+      node.options = deepCopy(draft.options);
+      if(node.options.length) node.linearNext = null;
+      state.optionAdjustDraft = null;
+      state.pendingOptionNodeId = null;
+      markDirty();
+      renderEditor();
+      closeModal();
     }
 
     function addOptionToNode(nodeId, stayInManager=false){
       const node = getActiveScript().nodes[nodeId];
+      const draft = getOptionAdjustDraft(nodeId);
       if(node.kind === 'ending'){ alert('结局节点不能增加选项。'); return false; }
-      if(node.options.length >= 4){ alert('每个节点最多 4 个选项。'); return false; }
-      if(node.linearNext){ alert('当前节点已存在场景后续，若要改为选项节点，请先长按删除已有连线。'); return false; }
-      pushHistory();
-      node.options.push({text:`选项${node.options.length + 1}`, nextId:null});
+      if(draft.options.length >= 4){ alert('每个节点最多 4 个选项。'); return false; }
+      if(node.linearNext && !draft.options.length){ alert('当前节点已存在场景后续，若要改为选项节点，请先长按删除已有连线。'); return false; }
+      draft.options.push({text:`选项${draft.options.length + 1}`, nextId:null});
       state.selectedNodeId = nodeId;
-      markDirty();
-      renderEditor();
+      state.pendingOptionNodeId = nodeId;
       if(stayInManager){
         renderOptionAdjustList();
       }
@@ -2605,8 +2659,25 @@ function openNodeEditModal(){
       focusNode(created.id);
     }
 
+    function getPendingConnectSelection(){
+      const s = getActiveScript();
+      const payload = state.pendingConnect;
+      if(!payload) return null;
+      const node = s.nodes[payload.nodeId];
+      if(!node) return null;
+      if(payload.type === 'option-unfilled'){
+        const idx = Number(document.getElementById('connectOptionSelect').value);
+        if(Number.isNaN(idx) || !node.options[idx]) return null;
+        return {payload, node, mode:'option', optionIndex:idx};
+      }
+      return {payload, node, mode:'linear', optionIndex:null};
+    }
+
     function openConnectExisting(payload){
       state.pendingConnect = payload;
+      const titleEl = document.getElementById('connectExistingTitle');
+      const subEl = document.getElementById('connectExistingSub');
+      const createRow = document.getElementById('connectCreateRow');
       const sel = document.getElementById('connectExistingSelect');
       const exclude = payload.nodeId;
       const endingsOnly = payload.type === 'node-ending';
@@ -2620,30 +2691,61 @@ function openNodeEditModal(){
           alert('当前没有未连接的选项。');
           return;
         }
+        titleEl.textContent = '连接已有选项';
+        subEl.textContent = '先选择一个未连接选项，再把它连接到已有节点，或直接新建独立节点 / 新建结局。';
         optionWrap.classList.remove('hidden');
+        createRow.classList.remove('hidden');
         optionSel.disabled = false;
         optionSel.innerHTML = unresolved.map(x => `<option value="${x.idx}">${escapeHtml(x.text)}</option>`).join('');
       } else {
+        titleEl.textContent = payload.type === 'node-ending' ? '连接到已有结局' : '连接到已有节点';
+        subEl.textContent = payload.type === 'node-ending'
+          ? '为当前节点选择一个已存在的结局节点。'
+          : '为当前节点选择一个已存在的目标节点。';
         optionWrap.classList.add('hidden');
+        createRow.classList.add('hidden');
         optionSel.innerHTML = '';
       }
       openModal('modalConnectExisting');
     }
 
     function connectPendingToExisting(targetId){
-      const s = getActiveScript();
-      const payload = state.pendingConnect;
-      if(!payload || !targetId) return;
-      const node = s.nodes[payload.nodeId];
+      const picked = getPendingConnectSelection();
+      if(!picked || !targetId) return false;
       pushHistory();
-      if(payload.type === 'node-linear' || payload.type === 'node-ending') node.linearNext = targetId;
-      else if(payload.type === 'option-unfilled'){
-        const idx = Number(document.getElementById('connectOptionSelect').value);
-        if(Number.isNaN(idx) || !node.options[idx]){ alert('请选择待连接的选项。'); return; }
-        node.options[idx].nextId = targetId;
-      }
+      if(picked.mode === 'linear') picked.node.linearNext = targetId;
+      else picked.node.options[picked.optionIndex].nextId = targetId;
       markDirty();
       renderEditor();
+      return true;
+    }
+
+    function createPendingConnectionTarget(kind){
+      const picked = getPendingConnectSelection();
+      if(!picked){
+        alert('请选择待连接的选项。');
+        return;
+      }
+      const sourceNode = picked.node;
+      const optionOffset = picked.mode === 'option'
+        ? (picked.optionIndex - (Math.max(sourceNode.options.length - 1, 0) / 2)) * 140
+        : 0;
+      pushHistory();
+      const created = addNodeToScript(getActiveScript(), {
+        title: kind === 'ending' ? '新结局' : '新场景',
+        x: sourceNode.x + 420,
+        y: sourceNode.y + optionOffset,
+        text: '',
+        kind
+      });
+      if(picked.mode === 'linear') sourceNode.linearNext = created.id;
+      else picked.node.options[picked.optionIndex].nextId = created.id;
+      state.selectedNodeId = created.id;
+      state.selectedAnchorId = null;
+      markDirty();
+      renderEditor();
+      closeModal();
+      focusNode(created.id);
     }
 
     function deleteSelectedNode(){
@@ -3205,17 +3307,23 @@ render();
     document.getElementById('connectExistingConfirm').addEventListener('click', () => {
       const val = document.getElementById('connectExistingSelect').value;
       if(!val){ alert('请选择一个目标节点。'); return; }
-      connectPendingToExisting(val);
-      closeModal();
+      if(connectPendingToExisting(val)) closeModal();
     });
+    document.getElementById('connectCreateSceneBtn').addEventListener('click', () => createPendingConnectionTarget('scene'));
+    document.getElementById('connectCreateEndingBtn').addEventListener('click', () => createPendingConnectionTarget('ending'));
 
     document.getElementById('optionAdjustAddBtn').addEventListener('click', () => {
       const nodeId = state.pendingOptionNodeId || state.selectedNodeId;
       if(!nodeId) return;
       addOptionToNode(nodeId, true);
     });
+    document.getElementById('optionAdjustOrderBtn').addEventListener('click', () => {
+      toggleOptionAdjustMode();
+    });
+    document.getElementById('optionAdjustSave').addEventListener('click', () => {
+      saveOptionAdjustDraft();
+    });
     document.getElementById('optionAdjustClose').addEventListener('click', () => {
-      state.pendingOptionNodeId = null;
       closeModal();
     });
 
@@ -3330,6 +3438,8 @@ render();
     switchPage('home');
     renderHome();
   </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
