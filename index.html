@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Branch Studio Pro 1.2</title>
+  <title>Cuckoo</title>
   <style>
     :root{
       --bg:#f7f7f5;
@@ -140,6 +140,14 @@
     .badge{font-size:11px;color:var(--muted);border:var(--border);background:#fafaf9;border-radius:999px;padding:5px 8px;font-weight:600}
     .ending .badge{background:#fff}
     .node-actions{display:flex;gap:6px;align-items:center;flex:0 0 auto;min-width:max-content}
+    .node-actions-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto}
+    .node-side-icons{display:flex;flex-direction:row;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+    .node-side-icon{
+      width:28px;height:28px;border-radius:10px;border:var(--border);background:#f6f6f4;color:#9a9a94;display:grid;place-items:center;
+      box-shadow:var(--shadow-soft);opacity:.72;
+    }
+    .node-side-icon.active{background:rgba(84,150,136,.12);border-color:rgba(84,150,136,.34);color:var(--cta);opacity:1}
+    .node-side-icon svg{width:14px;height:14px;display:block}
     .icon-pill{
       width:32px;height:32px;border-radius:999px;background:#fff;border:var(--border);display:grid;place-items:center;
       box-shadow:var(--shadow-soft);font-size:13px;color:#111;font-weight:700;padding:0;
@@ -274,17 +282,48 @@
 
     .field-label{font-size:12px;color:var(--muted);margin-bottom:6px}
     .node-meta-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    .node-meta-grid .full{grid-column:1/-1}
+    .node-config-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .node-config-icon{
+      width:32px;height:32px;border-radius:10px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;padding:0;color:#111;
+    }
+    .node-config-icon svg{width:15px;height:15px;display:block}
+    .node-config-icon.active{background:rgba(84,150,136,.12);border-color:rgba(84,150,136,.34);color:var(--cta)}
+    .config-summary-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .config-summary-box{
+      border:var(--border);border-radius:14px;background:#fafaf9;padding:10px 12px;font-size:12px;line-height:1.6;color:#333;word-break:break-word;max-height:120px;overflow:auto;
+    }
+    .reward-config-toolbar,.slot-config-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    .reward-config-list,.slot-config-list{display:flex;flex-direction:column;gap:10px}
+    .reward-config-row,.slot-config-row{display:grid;grid-template-columns:1fr;gap:8px;align-items:stretch;padding:10px 0}
+    .slot-row-top,.slot-row-bottom{display:flex;align-items:center;gap:10px}
+    .slot-row-top select{width:100%;min-width:0}
+    .slot-row-bottom{justify-content:space-between}
+    .reward-config-row,.slot-config-row{overflow-x:visible}
+    .reward-config-row select,.slot-config-row select{min-width:0}
+    .reward-row-actions,.slot-stepper{flex:0 0 auto}
+    .reward-item-input{min-width:0}
+    .reward-row-actions{display:inline-flex;align-items:center;gap:8px}
+    .reward-note-btn,.slot-remove-btn{width:32px;height:32px;border-radius:12px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center;padding:0;color:#111}
+    .reward-note-btn svg,.slot-remove-btn svg{width:14px;height:14px;display:block}
+    .reward-note-btn.active{background:rgba(84,150,136,.12);border-color:rgba(84,150,136,.34);color:var(--cta)}
+    .reward-note-text{margin-top:6px;font-size:12px;line-height:1.55;color:var(--muted);word-break:break-word;grid-column:1 / -1}
+    .slot-stepper,.reward-stepper{display:inline-flex;align-items:center;gap:6px;padding:4px 6px;border-radius:14px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft)}
+    .slot-step-btn,.reward-step-btn{width:28px;height:28px;border-radius:10px;border:var(--border);background:#fff;display:grid;place-items:center;padding:0;font-weight:800;color:#111}
+    .slot-step-btn:disabled,.reward-step-btn:disabled{opacity:.4;cursor:not-allowed}
+    .slot-step-val,.reward-step-val{min-width:26px;text-align:center;font-size:12px;font-weight:800}
     .title-input-row{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:center}
     .title-icon-btn{width:40px;height:40px;border-radius:12px;border:var(--border);background:#fff;box-shadow:var(--shadow-soft);display:grid;place-items:center}
     .title-icon-btn .svg-ico{width:16px;height:16px}
-    #modalNodeEdit{width:min(860px,96vw);max-height:min(74vh,620px);overflow:hidden}
-    #modalNodeEdit .stack{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.95fr);grid-template-areas:'title meta' 'text meta' 'actions actions';gap:10px;align-items:start}
-    #modalNodeEdit .row{margin-top:0}
+    #modalNodeEdit{width:min(860px,96vw);max-height:min(86vh,760px);overflow:auto}
+    #modalNodeEdit .stack{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.95fr);grid-template-areas:'title meta' 'text meta' 'actions actions';gap:10px;align-items:start;padding-bottom:4px}
+    #modalNodeEdit .row{margin-top:0;position:sticky;bottom:0;z-index:4;background:rgba(255,255,255,.98);padding-top:10px}
     #modalNodeEdit .stack > div:nth-child(1){grid-area:title}
     #modalNodeEdit .stack > div:nth-child(2){grid-area:text}
     #modalNodeEdit .stack > .node-meta-grid{grid-area:meta;align-content:start}
     #modalNodeEdit .stack > div:last-child{grid-area:actions}
     #modalNodeText{min-height:98px;height:98px;resize:none}
+    #modalSlotEdit{max-height:min(84vh,720px);overflow:auto}
     .option-adjust-list{display:flex;flex-direction:column;gap:8px}
     .option-adjust-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
     .option-adjust-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -370,9 +409,10 @@
       .brand-sub{font-size:11px}
       .node-plus{right:-12px}
       .sheet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-      #modalNodeEdit{width:min(96vw,720px);max-height:min(84vh,640px)}
+      #modalNodeEdit{width:min(96vw,720px);max-height:min(88vh,760px)}
       #modalNodeEdit .stack{grid-template-columns:1fr;grid-template-areas:'title' 'text' 'meta' 'actions'}
       #modalNodeText{height:120px;min-height:120px}
+      .reward-config-row,.slot-config-row{grid-template-columns:minmax(0,1fr) auto auto}
     }
   </style>
 </head>
@@ -381,10 +421,10 @@
     <section class="page active" id="homePage">
       <header class="topbar home-topbar" id="homeTopbar">
         <div class="brand home-brand" id="homeBrand">
-          <div class="brand-mark">B</div>
+          <div class="brand-mark">C</div>
           <div class="brand-copy">
-            <div class="brand-title">Branch Studio</div>
-            <div class="brand-sub">剧本主页 · 本地文件管理</div>
+            <div class="brand-title">Cuckoo</div>
+            <div class="brand-sub">分支文游编辑器</div>
           </div>
         </div>
         <div class="home-search-shell" id="homeSearchShell">
@@ -418,7 +458,7 @@
           </button>
           <div class="brand-copy">
             <div class="brand-title" id="editorScriptTitle">未命名剧本</div>
-            <div class="brand-sub" id="editorScriptMeta">0 节点 · 自动保存</div>
+            <div class="brand-sub" id="editorScriptMeta">Cuckoo · 分支文游编辑器</div>
           </div>
         </div>
         <div class="top-actions">
@@ -570,6 +610,21 @@
             <div><div class="field-label">编号</div><input id="modalNodeId" disabled /></div>
             <div><div class="field-label">X</div><input id="modalPosX" type="number" placeholder="X" /></div>
             <div><div class="field-label">Y</div><input id="modalPosY" type="number" placeholder="Y" /></div>
+            <div class="full">
+              <div class="field-label">节点功能</div>
+              <div class="node-config-tools">
+                <button class="node-config-icon" id="modalRewardsBtn" title="获取物品">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M12 4L13.8 8.1L18 10L13.8 11.9L12 16L10.2 11.9L6 10L10.2 8.1L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="node-config-icon" id="modalSlotsBtn" title="卡槽">
+                  <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M9 12H15" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="config-summary-list">
+                <div class="config-summary-box hidden" id="modalRewardsSummary"></div>
+                <div class="config-summary-box hidden" id="modalSlotsSummary"></div>
+              </div>
+            </div>
           </div>
           <div class="stack hidden" id="modalOptionsEditorBlock">
             <div class="field-label">后续选项</div>
@@ -582,6 +637,39 @@
         </div>
       </div>
 
+      <div class="modal sm hidden" id="modalRewardEdit">
+        <h3>获取物品</h3>
+        <div class="modal-sub">每个物品一行，可设置数量和备注。备注最多 50 字，保存后会显示在背包物品名称下面。</div>
+        <div class="stack">
+          <div class="reward-config-toolbar">
+            <div class="mini" id="rewardCountHint">已添加 1 项</div>
+            <button class="text-btn sm cta" id="rewardAddBtn">新增物品</button>
+          </div>
+          <div class="reward-config-list" id="rewardConfigList"></div>
+          <div class="mini" id="rewardPreview"></div>
+          <div class="row">
+            <button class="text-btn" id="rewardCancel">返回</button>
+            <button class="text-btn cta" id="rewardSave">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal hidden" id="modalSlotEdit">
+        <h3>添加卡槽</h3>
+        <div class="modal-sub">默认 1 个卡槽，最多 6 个。点击“新增卡槽”添加，物品从全剧本已保存的获取物品里选择，数量上限按该物品总数计算。</div>
+        <div class="stack">
+          <div class="slot-config-toolbar">
+            <div class="mini" id="slotCountHint">已添加 1 / 6</div>
+            <button class="text-btn sm cta" id="slotAddBtn">新增卡槽</button>
+          </div>
+          <div class="slot-config-list" id="slotConfigList"></div>
+          <div class="mini" id="slotConfigHint"></div>
+          <div class="row">
+            <button class="text-btn" id="slotCancel">返回</button>
+            <button class="text-btn cta" id="slotSave">保存</button>
+          </div>
+        </div>
+      </div>
 
       <div class="modal hidden" id="modalOptionAdjust">
         <h3>调整选项</h3>
@@ -753,7 +841,9 @@
       aiSettings: null,
       aiDrafts: {},
       aiRefPrefs: {modal:{enabled:false, source:'all'}, text:{enabled:false, source:'all'}},
-      history: []
+      history: [],
+      slotDraft: null,
+      rewardDraft: null
     };
 
     state.aiSettings = loadAiSettings();
@@ -1444,6 +1534,356 @@ ${prompts.user}`;
       refreshAiUndoButton(scope);
     }
 
+
+    function normalizeRewards(list){
+      return (Array.isArray(list) ? list : []).map(item => {
+        if(typeof item === 'string') item = parseRewardText(item);
+        return {
+          item: String(item?.item || item?.name || '').trim(),
+          qty: Math.max(1, Number(item?.qty || item?.count || 1) || 1),
+          note: String(item?.note || item?.desc || '').trim().slice(0, 50)
+        };
+      }).filter(item => item.item);
+    }
+
+    function normalizeSlots(list){
+      return (Array.isArray(list) ? list : []).map(item => ({
+        item: String(item?.item || item?.name || '').trim(),
+        qty: Math.max(1, Number(item?.qty || item?.count || 1) || 1)
+      })).filter(item => item.item).slice(0, 6);
+    }
+
+    function parseRewardText(line){
+      const raw = String(line || '').trim().replace(/，/g, ',');
+      if(!raw) return null;
+      const match = raw.match(/^(.*?)(?:\s*\+\s*(\d+))?$/);
+      const item = String(match?.[1] || '').trim();
+      const qty = Math.max(1, Number(match?.[2] || 1) || 1);
+      return item ? {item, qty} : null;
+    }
+
+    function parseRewardInput(text){
+      return String(text || '')
+        .split(/\n+/)
+        .map(line => parseRewardText(line))
+        .filter(Boolean);
+    }
+
+    function formatRewardEntries(list){
+      const rewards = normalizeRewards(list);
+      return rewards.length ? rewards.map(item => `${item.item}+${item.qty}`).join('，') : '';
+    }
+
+    function formatSlotEntries(list){
+      const slots = normalizeSlots(list);
+      return slots.length ? slots.map(item => `${item.item}+${item.qty}`).join('，') : '';
+    }
+
+    function getScriptRewardTotals(script, excludeNodeId=''){
+      const totals = {};
+      Object.values(script?.nodes || {}).forEach(node => {
+        if(excludeNodeId && String(node.id) === String(excludeNodeId)) return;
+        normalizeRewards(node.rewards || []).forEach(entry => {
+          totals[entry.item] = (totals[entry.item] || 0) + entry.qty;
+        });
+      });
+      return totals;
+    }
+
+    function getAllRewardNames(script){
+      return Object.keys(getScriptRewardTotals(script)).sort((a,b) => a.localeCompare(b, 'zh-Hans-CN'));
+    }
+
+    function refreshNodeConfigIndicators(node=getSelectedNode()){
+      const rewardsBtn = document.getElementById('modalRewardsBtn');
+      const slotsBtn = document.getElementById('modalSlotsBtn');
+      const rewardsBox = document.getElementById('modalRewardsSummary');
+      const slotsBox = document.getElementById('modalSlotsSummary');
+      if(!node || !rewardsBtn || !slotsBtn || !rewardsBox || !slotsBox) return;
+      const rewardsText = formatRewardEntries(node.rewards || []);
+      const slotsText = formatSlotEntries(node.slots || []);
+      rewardsBtn.classList.toggle('active', !!rewardsText);
+      slotsBtn.classList.toggle('active', !!slotsText);
+      rewardsBox.classList.toggle('hidden', !rewardsText);
+      slotsBox.classList.toggle('hidden', !slotsText);
+      rewardsBox.textContent = rewardsText ? `获取：${rewardsText}` : '';
+      slotsBox.textContent = slotsText ? `卡槽：${slotsText}` : '';
+    }
+
+    function buildRewardDraft(node){
+      const rewards = normalizeRewards(node?.rewards || []);
+      return {
+        items: rewards.length ? rewards : [{item:'', qty:1, note:''}]
+      };
+    }
+
+    function ensureRewardDraftRows(){
+      state.rewardDraft = state.rewardDraft || {items:[{item:'', qty:1, note:''}]};
+      if(!Array.isArray(state.rewardDraft.items)) state.rewardDraft.items = [];
+      if(!state.rewardDraft.items.length) return;
+      state.rewardDraft.items = state.rewardDraft.items.slice(0, 24).map(item => ({
+        item: String(item?.item || '').trim(),
+        qty: Math.max(1, Number(item?.qty || 1) || 1),
+        note: String(item?.note || '').trim().slice(0, 50)
+      }));
+    }
+
+    function addRewardDraftRow(){
+      state.rewardDraft = state.rewardDraft || {items:[]};
+      state.rewardDraft.items.push({item:'', qty:1, note:''});
+      ensureRewardDraftRows();
+      renderRewardDraft();
+    }
+
+    function removeRewardDraftRow(index){
+      state.rewardDraft = state.rewardDraft || {items:[]};
+      state.rewardDraft.items.splice(index, 1);
+      if(!state.rewardDraft.items.length) state.rewardDraft.items.push({item:'', qty:1, note:''});
+      ensureRewardDraftRows();
+      renderRewardDraft();
+    }
+
+    function openRewardEditModal(){
+      const node = getSelectedNode();
+      if(!node) return;
+      state.rewardDraft = buildRewardDraft(node);
+      renderRewardDraft();
+      openModal('modalRewardEdit');
+    }
+
+    function updateRewardPreview(){
+      const parsed = normalizeRewards(state.rewardDraft?.items || []);
+      const preview = parsed.length ? `预览：${parsed.map(item => `${item.item}+${item.qty}${item.note ? `（${item.note}）` : ''}`).join('，')}` : '当前未设置获取物品';
+      const hint = document.getElementById('rewardPreview');
+      if(hint) hint.textContent = preview;
+      const countHint = document.getElementById('rewardCountHint');
+      if(countHint) countHint.textContent = `已添加 ${Math.max(0, (state.rewardDraft?.items || []).filter(item => item.item).length || 0)} 项`;
+    }
+
+    function renderRewardDraft(){
+      ensureRewardDraftRows();
+      const list = document.getElementById('rewardConfigList');
+      if(!list) return;
+      list.innerHTML = '';
+      (state.rewardDraft?.items || []).forEach((entry, idx) => {
+        const row = document.createElement('div');
+        row.className = 'reward-config-row';
+        row.innerHTML = `
+          <input class="reward-item-input" data-reward-item="${idx}" value="${escapeHtml(entry.item || '')}" placeholder="物品名称" />
+          <div class="reward-stepper">
+            <button type="button" class="reward-step-btn" data-reward-dec="${idx}">－</button>
+            <div class="reward-step-val">${entry.qty || 1}</div>
+            <button type="button" class="reward-step-btn" data-reward-inc="${idx}">＋</button>
+          </div>
+          <div class="reward-row-actions">
+            <button type="button" class="reward-note-btn ${entry.note ? 'active' : ''}" data-reward-note="${idx}" title="备注">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 7H17M7 12H14M7 17H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 4H19V20L15.5 17H5V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            </button>
+            <button type="button" class="slot-remove-btn" data-reward-remove="${idx}" title="删除物品">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          ${entry.note ? `<div class="reward-note-text">${escapeHtml(entry.note)}</div>` : ''}
+        `;
+        list.appendChild(row);
+      });
+      list.querySelectorAll('[data-reward-item]').forEach(el => el.addEventListener('input', (e) => {
+        const idx = Number(e.target.dataset.rewardItem);
+        state.rewardDraft.items[idx].item = String(e.target.value || '').trim();
+        updateRewardPreview();
+      }));
+      list.querySelectorAll('[data-reward-dec]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.rewardDec);
+        state.rewardDraft.items[idx].qty = Math.max(1, (Number(state.rewardDraft.items[idx].qty || 1) || 1) - 1);
+        renderRewardDraft();
+      }));
+      list.querySelectorAll('[data-reward-inc]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.rewardInc);
+        state.rewardDraft.items[idx].qty = Math.max(1, (Number(state.rewardDraft.items[idx].qty || 1) || 1) + 1);
+        renderRewardDraft();
+      }));
+      list.querySelectorAll('[data-reward-note]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.rewardNote);
+        const current = state.rewardDraft.items[idx]?.note || '';
+        const note = prompt('输入备注（50字内）', current);
+        if(note === null) return;
+        state.rewardDraft.items[idx].note = String(note || '').trim().slice(0, 50);
+        renderRewardDraft();
+      }));
+      list.querySelectorAll('[data-reward-remove]').forEach(el => el.addEventListener('click', () => {
+        removeRewardDraftRow(Number(el.dataset.rewardRemove));
+      }));
+      updateRewardPreview();
+    }
+
+    function saveRewardConfig(){
+      const node = getSelectedNode();
+      if(!node) return;
+      pushHistory();
+      node.rewards = normalizeRewards(state.rewardDraft?.items || []);
+      if(node.rewards.length === 1 && !node.rewards[0].item) node.rewards = [];
+      markDirty();
+      openNodeEditModal();
+      renderEditor();
+    }
+
+    function buildSlotDraft(node){
+      const slots = normalizeSlots(node?.slots || []);
+      return {
+        count: slots.length ? Math.min(6, slots.length) : 1,
+        slots: slots.length ? slots : [{item:'', qty:1}]
+      };
+    }
+
+    function ensureSlotDraftRows(){
+      if(!state.slotDraft) return;
+      const count = Math.max(0, Math.min(6, Number(state.slotDraft.count || 0) || 0));
+      state.slotDraft.count = count;
+      while(state.slotDraft.slots.length < count) state.slotDraft.slots.push({item:'', qty:1});
+      if(state.slotDraft.slots.length > count) state.slotDraft.slots = state.slotDraft.slots.slice(0, count);
+    }
+
+    function openSlotEditModal(){
+      const node = getSelectedNode();
+      if(!node) return;
+      state.slotDraft = buildSlotDraft(node);
+      renderSlotDraft();
+      openModal('modalSlotEdit');
+    }
+
+    function addSlotDraftRow(){
+      state.slotDraft = state.slotDraft || {count:1, slots:[{item:'', qty:1}]};
+      if((state.slotDraft.count || 0) >= 6) return;
+      state.slotDraft.count += 1;
+      ensureSlotDraftRows();
+      renderSlotDraft();
+    }
+
+    function removeSlotDraftRow(index){
+      state.slotDraft = state.slotDraft || {count:1, slots:[{item:'', qty:1}]};
+      state.slotDraft.slots.splice(index, 1);
+      state.slotDraft.count = Math.max(0, state.slotDraft.count - 1);
+      ensureSlotDraftRows();
+      renderSlotDraft();
+    }
+
+    function renderSlotDraft(){
+      const node = getSelectedNode();
+      const script = getActiveScript();
+      if(!node || !script) return;
+      const totals = getScriptRewardTotals(script);
+      const names = Object.keys(totals).sort((a,b) => a.localeCompare(b, 'zh-Hans-CN'));
+      ensureSlotDraftRows();
+      const list = document.getElementById('slotConfigList');
+      const hint = document.getElementById('slotConfigHint');
+      const countHint = document.getElementById('slotCountHint');
+      const addBtn = document.getElementById('slotAddBtn');
+      if(countHint) countHint.textContent = `已添加 ${state.slotDraft.count} / 6`;
+      if(addBtn) addBtn.disabled = state.slotDraft.count >= 6;
+      list.innerHTML = '';
+      if(!state.slotDraft.count){
+        hint.textContent = '当前未启用卡槽功能。';
+        return;
+      }
+      if(!names.length){
+        list.innerHTML = '<div class="alert">还没有任何可选物品。请先在其他节点里保存“获取物品”。</div>';
+        hint.textContent = '';
+        return;
+      }
+      for(let i = 0; i < state.slotDraft.count; i++){
+        const slot = state.slotDraft.slots[i] || {item:'', qty:1};
+        const totalForItem = slot.item ? Math.max(0, totals[slot.item] || 0) : 0;
+        const maxQty = slot.item ? Math.max(1, totalForItem || 1) : 1;
+        slot.qty = Math.max(1, Math.min(Number(slot.qty || 1) || 1, maxQty));
+        state.slotDraft.slots[i] = slot;
+        const row = document.createElement('div');
+        row.className = 'slot-config-row';
+        const optionsHtml = ['<option value="">选择物品</option>']
+          .concat(names.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}·总数${totals[name] || 0}</option>`))
+          .join('');
+        row.innerHTML = `
+          <div class="slot-row-top">
+            <select data-slot-item="${i}">${optionsHtml}</select>
+          </div>
+          <div class="slot-row-bottom">
+            <div class="slot-stepper">
+              <button type="button" class="slot-step-btn" data-slot-dec="${i}" ${slot.item ? '' : 'disabled'}>－</button>
+              <div class="slot-step-val">${slot.item ? slot.qty : '-'}</div>
+              <button type="button" class="slot-step-btn" data-slot-inc="${i}" ${slot.item ? '' : 'disabled'} ${slot.item && slot.qty >= maxQty ? 'disabled' : ''}>＋</button>
+            </div>
+            <button type="button" class="slot-remove-btn" data-slot-remove="${i}" title="删除该卡槽">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        `;
+        list.appendChild(row);
+        row.querySelector(`[data-slot-item="${i}"]`).value = slot.item || '';
+      }
+      list.querySelectorAll('[data-slot-item]').forEach(el => el.addEventListener('change', (e) => {
+        const idx = Number(e.target.dataset.slotItem);
+        const totalsNow = getScriptRewardTotals(getActiveScript());
+        const itemName = String(e.target.value || '').trim();
+        const max = itemName ? Math.max(1, totalsNow[itemName] || 1) : 1;
+        state.slotDraft.slots[idx] = {
+          item: itemName,
+          qty: itemName ? Math.min(Math.max(1, Number(state.slotDraft.slots[idx]?.qty || 1) || 1), max) : 1
+        };
+        renderSlotDraft();
+      }));
+      list.querySelectorAll('[data-slot-dec]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.slotDec);
+        const slot = state.slotDraft.slots[idx] || {item:'', qty:1};
+        if(!slot.item) return;
+        slot.qty = Math.max(1, (Number(slot.qty || 1) || 1) - 1);
+        state.slotDraft.slots[idx] = slot;
+        renderSlotDraft();
+      }));
+      list.querySelectorAll('[data-slot-inc]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.slotInc);
+        const slot = state.slotDraft.slots[idx] || {item:'', qty:1};
+        if(!slot.item) return;
+        const totalsNow = getScriptRewardTotals(getActiveScript());
+        const max = Math.max(1, totalsNow[slot.item] || 1);
+        slot.qty = Math.min(max, (Number(slot.qty || 1) || 1) + 1);
+        state.slotDraft.slots[idx] = slot;
+        renderSlotDraft();
+      }));
+      list.querySelectorAll('[data-slot-remove]').forEach(el => el.addEventListener('click', () => {
+        const idx = Number(el.dataset.slotRemove);
+        removeSlotDraftRow(idx);
+      }));
+      renderSlotHint();
+    }
+
+    function renderSlotHint(){
+      const script = getActiveScript();
+      const totals = getScriptRewardTotals(script);
+      const active = (state.slotDraft?.slots || []).slice(0, state.slotDraft?.count || 0).filter(item => item.item);
+      document.getElementById('slotConfigHint').textContent = active.length
+        ? active.map(item => `${item.item} · 总数 ${totals[item.item] || 0}`).join('；')
+        : '当前未设置卡槽需求';
+    }
+
+    function saveSlotConfig(){
+      const node = getSelectedNode();
+      if(!node) return;
+      ensureSlotDraftRows();
+      const script = getActiveScript();
+      const totals = getScriptRewardTotals(script);
+      const slots = (state.slotDraft?.slots || []).slice(0, state.slotDraft?.count || 0).map(item => ({
+        item: String(item?.item || '').trim(),
+        qty: Math.max(1, Number(item?.qty || 1) || 1)
+      })).filter(item => item.item).map(item => ({
+        item: item.item,
+        qty: Math.min(item.qty, Math.max(1, totals[item.item] || item.qty))
+      })).slice(0, 6);
+      pushHistory();
+      node.slots = slots;
+      markDirty();
+      openNodeEditModal();
+      renderEditor();
+    }
+
     function createBlankScript(name='未命名剧本'){
       return {
         id: 'script_' + Math.random().toString(36).slice(2,10),
@@ -1454,7 +1894,7 @@ ${prompts.user}`;
         anchorCounter: 0,
         startId: '1',
         nodes: {
-          '1': {id:'1', title:'故事开始', text:'在这里输入故事的第一幕。', kind:'scene', x:160, y:240, linearNext:null, options:[], locked:false, titleEnabled:true}
+          '1': {id:'1', title:'故事开始', text:'在这里输入故事的第一幕。', kind:'scene', x:160, y:240, linearNext:null, options:[], locked:false, titleEnabled:true, rewards:[], slots:[]}
         },
         anchors: {}
       };
@@ -1471,7 +1911,7 @@ ${prompts.user}`;
 
     function addNodeToScript(script, {title='新场景', text='', x=200, y=200, kind='scene'}={}){
       const id = nextNumericId(script);
-      script.nodes[id] = {id, title, text, x, y, kind, linearNext:null, options:[], locked:false, titleEnabled:true};
+      script.nodes[id] = {id, title, text, x, y, kind, linearNext:null, options:[], locked:false, titleEnabled:true, rewards:[], slots:[]};
       script.updatedAt = now();
       return script.nodes[id];
     }
@@ -1500,6 +1940,8 @@ ${prompts.user}`;
       script.anchors = script.anchors || {};
       Object.values(script.nodes).forEach(n => {
         if(typeof n.titleEnabled === 'undefined') n.titleEnabled = true;
+        n.rewards = normalizeRewards(n.rewards || []);
+        n.slots = normalizeSlots(n.slots || []);
       });
       return script;
     }
@@ -1652,8 +2094,9 @@ ${prompts.user}`;
       const anchorCount = s ? Object.keys(s.anchors || {}).length : 0;
       const endings = s ? Object.values(s.nodes).filter(n => n.kind === 'ending').length : 0;
       document.getElementById('editorScriptTitle').textContent = s?.name || '未命名剧本';
-      document.getElementById('editorScriptMeta').textContent = `${nodeCount} 节点 · ${endings} 结局 · 自动保存`;
-      document.getElementById('graphStats').textContent = `${nodeCount} 节点 · ${endings} 结局 · ${anchorCount} 锚点`;
+      document.getElementById('editorScriptMeta').textContent = 'Cuckoo · 分支文游编辑器';
+      document.title = 'Cuckoo';
+      document.getElementById('graphStats').textContent = `${s?.name || '未命名剧本'} · ${nodeCount} 节点 · ${endings} 结局 · ${anchorCount} 锚点`;
     }
 
     function targetNodeOptions(includeBlank=true, excludeId=null, endingsOnly=false){
@@ -1768,6 +2211,53 @@ ${prompts.user}`;
 
       cycles.forEach(id => errors.push({nodeId:id, text:`${id}「${script.nodes[id].title}」位于循环连接中。整体应保持单向推进。`}));
 
+      if(!cycles.length && script.startId && script.nodes[script.startId]){
+        const nodeLimit = Object.keys(script.nodes || {}).length + 2;
+        const slotErrors = [];
+        function cloneBag(bag){
+          return Object.fromEntries(Object.entries(bag || {}).filter(([, qty]) => qty > 0));
+        }
+        function addRewardsToBag(bag, rewards){
+          const next = cloneBag(bag);
+          normalizeRewards(rewards || []).forEach(entry => {
+            next[entry.item] = (next[entry.item] || 0) + entry.qty;
+          });
+          return next;
+        }
+        function consumeSlotsFromBag(bag, slots){
+          const next = cloneBag(bag);
+          const missing = [];
+          normalizeSlots(slots || []).forEach(req => {
+            const have = next[req.item] || 0;
+            if(have < req.qty) missing.push(`${req.item}缺少${req.qty - have}`);
+            next[req.item] = Math.max(0, have - req.qty);
+            if(!next[req.item]) delete next[req.item];
+          });
+          return {ok: missing.length === 0, bag: next, missing};
+        }
+        function dfs(nodeId, bag, path, depth){
+          if(depth > nodeLimit) return;
+          const node = script.nodes[nodeId];
+          if(!node) return;
+          const bagAfterRewards = addRewardsToBag(bag, node.rewards || []);
+          const consumeResult = consumeSlotsFromBag(bagAfterRewards, node.slots || []);
+          if(!consumeResult.ok){
+            slotErrors.push({
+              nodeId: node.id,
+              text: `${node.id}「${getNodeDisplayTitle(node) || '未命名节点'}」的卡槽需求无法满足：${consumeResult.missing.join('，')}。线路：${path.join(' → ')}`
+            });
+            return;
+          }
+          getOutgoing(node).forEach(edge => {
+            if(edge.to && script.nodes[edge.to]){
+              dfs(String(edge.to), consumeResult.bag, path.concat(String(edge.to)), depth + 1);
+            }
+          });
+        }
+        dfs(String(script.startId), {}, [String(script.startId)], 0);
+        slotErrors.forEach(err => errors.push(err));
+      }
+
       const dedup = []; const seen = new Set();
       errors.forEach(e => { const k = `${e.nodeId||'global'}|${e.text}`; if(!seen.has(k)){ seen.add(k); dedup.push(e); } });
       state.validation = {ok: dedup.length === 0, errors: dedup, problemNodeIds:[...new Set(dedup.map(e=>e.nodeId).filter(Boolean))]};
@@ -1780,7 +2270,7 @@ ${prompts.user}`;
       const wrap = document.getElementById('modalValidationList');
       wrap.innerHTML = '';
       if(v.ok){
-        wrap.innerHTML = '<div class="alert success">结构通过校验，可以导出故事 TXT 和文字游戏 HTML。</div>';
+        wrap.innerHTML = '<div class="alert success">结构通过校验，可以导出故事 TXT 和 Cuckoo HTML。</div>';
       } else {
         v.errors.forEach(err => {
           const div = document.createElement('div');
@@ -1825,14 +2315,20 @@ ${prompts.user}`;
               ${node.kind === 'ending' ? '<span class="badge">结局</span>' : ''}
               ${node.options.length ? `<span class="badge">${node.options.length} 选项</span>` : ''}
             </div>
-            <div class="node-actions">
-              <button class="icon-pill ${node.locked ? 'locked' : ''}" data-lock="${node.id}" title="固定">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 11V8A4 4 0 0 1 16 8V11" stroke="currentColor" stroke-width="2"/><rect x="6" y="11" width="12" height="9" rx="2" stroke="currentColor" stroke-width="2"/></svg>
-              </button>
-              <button class="icon-pill edit" data-edit="${node.id}" title="编辑">编辑</button>
-              <button class="icon-pill" data-delete="${node.id}" title="删除">
-                <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-              </button>
+            <div class="node-actions-wrap">
+              <div class="node-actions">
+                <button class="icon-pill ${node.locked ? 'locked' : ''}" data-lock="${node.id}" title="固定">
+                  <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M8 11V8A4 4 0 0 1 16 8V11" stroke="currentColor" stroke-width="2"/><rect x="6" y="11" width="12" height="9" rx="2" stroke="currentColor" stroke-width="2"/></svg>
+                </button>
+                <button class="icon-pill edit" data-edit="${node.id}" title="编辑">编辑</button>
+                <button class="icon-pill" data-delete="${node.id}" title="删除">
+                  <svg class="svg-ico" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+              <div class="node-side-icons">
+                ${node.rewards?.length ? `<div class="node-side-icon active" title="获取物品"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4L13.8 8.1L18 10L13.8 11.9L12 16L10.2 11.9L6 10L10.2 8.1L12 4Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg></div>` : ''}
+                ${node.slots?.length ? `<div class="node-side-icon active" title="卡槽"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="14" height="14" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="M9 12H15" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg></div>` : ''}
+              </div>
             </div>
           </div>
           ${getNodeDisplayTitle(node) ? `<div class="node-title">${escapeHtml(getNodeDisplayTitle(node))}</div>` : ''}
@@ -2379,7 +2875,7 @@ function bindEdgeDeleteLongPress(pathEl){
     function openModal(id){
       state.activeModal = id;
       modalBackdrop.classList.add('open');
-      ['modalNodeEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => {
+      ['modalNodeEdit','modalRewardEdit','modalSlotEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => {
         document.getElementById(mid).classList.toggle('hidden', mid !== id);
       });
     }
@@ -2388,9 +2884,13 @@ function bindEdgeDeleteLongPress(pathEl){
         state.optionAdjustDraft = null;
         state.pendingOptionNodeId = null;
       }
+      if(state.activeModal === 'modalSlotEdit'){
+        state.slotDraft = null;
+        state.rewardDraft = null;
+      }
       state.activeModal = null;
       modalBackdrop.classList.remove('open');
-      ['modalNodeEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => document.getElementById(mid).classList.add('hidden'));
+      ['modalNodeEdit','modalRewardEdit','modalSlotEdit','modalOptionAdjust','modalConnectExisting','modalAnchorEdit','modalAiSettings','modalAiProfile','modalValidation'].forEach(mid => document.getElementById(mid).classList.add('hidden'));
     }
 
     
@@ -2454,6 +2954,7 @@ function openNodeEditModal(){
       syncTitleToggleButtons(node);
       document.getElementById('modalOptionsEditorBlock').classList.add('hidden');
       document.getElementById('modalOptionsEditor').innerHTML = '';
+      refreshNodeConfigIndicators(node);
       setAiStatus(document.getElementById('modalAiStatus'), '');
       openModal('modalNodeEdit');
       refreshAiUndoButton('modal');
@@ -2857,55 +3358,81 @@ function exportPlayableHTML(){
         }));
         const storyJson = JSON.stringify(script).replace(/<\/script/gi, '<\\/script');
         const endingsJson = JSON.stringify(endings).replace(/<\/script/gi, '<\\/script');
-        const safeTitle = escapeHtml(script.name || 'HTML游戏');
         const playable = `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>${safeTitle}</title>
+<title>Cuckoo</title>
 <style>
-:root{--bg:#f7f7f5;--panel:#ffffff;--text:#111111;--muted:#6b6b6b;--line:rgba(17,17,17,.08);--accent:#549688;--accent-dark:#3f776d;--shadow:0 18px 40px rgba(17,17,17,.08);--key-shadow:0 10px 0 rgba(63,119,109,.22),0 18px 24px rgba(17,17,17,.08)}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
+:root{--bg:#f7f7f5;--panel:#ffffff;--text:#111111;--muted:#6b6b6b;--line:rgba(17,17,17,.08);--accent:#549688;--accent-dark:#3f776d;--accent-soft:rgba(84,150,136,.12);--shadow:0 18px 40px rgba(17,17,17,.08);--danger:#c94d4d}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{height:100%;margin:0}button,input{font:inherit;outline:none;-webkit-tap-highlight-color:transparent}
 body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fbfbfa,#f3f3f1);color:var(--text)}
-.app{height:100%;display:flex;flex-direction:column}
-.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(12px)}
+button{cursor:pointer;outline:none;-webkit-appearance:none;appearance:none}
+button:focus,button:focus-visible,input:focus,input:focus-visible,.icon-btn:focus,.icon-btn:focus-visible,.choice:focus,.choice:focus-visible,.slot-tile:focus,.slot-tile:focus-visible,.slot-action:focus,.slot-action:focus-visible,.qty-btn:focus,.qty-btn:focus-visible,.slot-picker-item:focus,.slot-picker-item:focus-visible{outline:none}
+.app{min-height:100%;display:flex;flex-direction:column}
+.topbar{height:60px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(12px)}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
 .mark{width:36px;height:36px;border-radius:14px;background:linear-gradient(180deg,var(--accent),#3e746a);display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:0 10px 24px rgba(84,150,136,.2)}
 .brand-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand-sub{font-size:11px;color:var(--muted)}
+.brand-sub{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top-actions{display:flex;gap:10px}
 .icon-btn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--text);display:grid;place-items:center;box-shadow:0 8px 18px rgba(17,17,17,.06);padding:0}
 .icon-btn svg{width:18px;height:18px;display:block}
 .main{flex:1;display:flex;align-items:center;justify-content:center;padding:18px}
 .frame{width:min(860px,100%)}
-.scene-card{height:min(32vh,280px);border-radius:30px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#fafaf8);box-shadow:var(--shadow);overflow:hidden;display:grid;grid-template-rows:auto 1fr auto}
+.scene-card{min-height:440px;border-radius:30px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#fafaf8);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:opacity .18s ease,transform .18s ease,filter .18s ease}
 .scene-card.ending{background:linear-gradient(180deg,rgba(84,150,136,.10),rgba(84,150,136,.04));border-color:rgba(84,150,136,.28)}
-.scene-head{padding:18px 20px 0 20px}
+.scene-card.scene-swap-out{opacity:.08;transform:translateY(8px) scale(.992);filter:blur(2px)}
+.scene-card.scene-swap-in{animation:sceneCardIn .24s ease both}
+@keyframes sceneCardIn{from{opacity:.08;transform:translateY(10px) scale(.992);filter:blur(2px)}to{opacity:1;transform:none;filter:none}}
+.scene-head{padding:20px 20px 0 20px}
 .scene-title{font-size:24px;line-height:1.2;font-weight:800;letter-spacing:-.02em;margin:0 0 8px 0;word-break:break-word}
 .scene-title:empty{display:none}
 .scene-progress{font-size:12px;color:var(--muted)}
-.unlock-banner{display:none;align-items:center;gap:10px;margin-top:12px}
-.unlock-banner.show{display:flex}
-.unlock-pill{min-width:auto;height:28px;padding:0 14px;border-radius:999px;background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;letter-spacing:.02em}
-.all-unlocked-note{grid-column:1/-1;padding-top:2px;color:var(--muted);font-size:13px}
-.scene-text{padding:12px 20px 10px 20px;overflow:auto;font-size:15px;line-height:1.8;color:#222;white-space:pre-wrap;word-break:break-word}
-.scene-actions{padding:12px 20px 18px 20px;border-top:1px solid rgba(17,17,17,.06);display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,.72)}
-.choice{width:100%;text-align:left;padding:15px 18px;border-radius:18px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#f2f2ee);color:var(--text);font-size:15px;font-weight:800;box-shadow:0 7px 0 rgba(17,17,17,.08),0 14px 22px rgba(17,17,17,.06);transition:transform .08s ease, box-shadow .08s ease, filter .16s ease, opacity .16s ease}
+.scene-text{padding:14px 20px 4px 20px;flex:1 1 auto;overflow:auto;font-size:15px;line-height:1.85;color:#222;white-space:pre-wrap;word-break:break-word;min-height:170px}
+.reward-note{padding:0 20px 10px 20px;font-size:14px;line-height:1.7;font-weight:800;word-break:break-word}
+.slot-strip{padding:0 20px 12px 20px;display:flex;flex-wrap:wrap;gap:10px}
+.slot-tile{width:58px;height:58px;border-radius:18px;border:1px solid rgba(17,17,17,.08);background:#f0f0ec;color:#9aa0a8;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 10px 18px rgba(17,17,17,.06), inset 0 0 0 1px rgba(255,255,255,.35);transition:transform .12s ease, filter .12s ease, background .12s ease, color .12s ease;outline:none;-webkit-tap-highlight-color:transparent}
+.slot-tile.filled{background:rgba(84,150,136,.14);color:var(--accent)}
+.slot-tile.correct{background:linear-gradient(180deg,rgba(84,150,136,.28),rgba(84,150,136,.16));color:#2f685f}
+.slot-tile:active{transform:scale(.96)}
+.slot-tile .inner{font-size:22px;font-weight:900;line-height:1;display:grid;place-items:center}
+.slot-tile .inner svg{width:24px;height:24px;display:block}
+.slot-tile .qty{position:absolute;right:6px;bottom:5px;font-size:11px;font-weight:800}
+.scene-actions{padding:14px 20px 20px 20px;border-top:1px solid rgba(17,17,17,.06);display:flex;flex-direction:column;gap:12px;background:rgba(255,255,255,.72)}
+.choice{width:100%;text-align:left;padding:15px 18px;border-radius:18px;border:1px solid rgba(17,17,17,.08);background:linear-gradient(180deg,#ffffff,#f2f2ee);color:var(--text);font-size:15px;font-weight:800;box-shadow:0 7px 0 rgba(17,17,17,.08),0 14px 22px rgba(17,17,17,.06);transition:transform .08s ease, box-shadow .08s ease, filter .16s ease, opacity .16s ease, background .16s ease, color .16s ease}
 .choice:hover{filter:brightness(1.01)}
 .choice:active{transform:translateY(4px);box-shadow:0 3px 0 rgba(17,17,17,.08),0 8px 14px rgba(17,17,17,.06)}
+.choice.pressed{transform:translateY(4px)!important;box-shadow:0 3px 0 rgba(17,17,17,.08),0 8px 14px rgba(17,17,17,.06)!important}
 .choice:disabled{opacity:.82;pointer-events:none}
-.choice.single{background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:var(--key-shadow)}
-.choice.single:active{box-shadow:0 4px 0 rgba(63,119,109,.22),0 10px 14px rgba(17,17,17,.08)}
-.stage-anim{animation:pushIn .42s cubic-bezier(.2,.75,.18,1)}
-.scene-card.leaving{animation:pushOut .22s ease forwards}
-@keyframes pushIn{from{opacity:.16;transform:translateX(28px) scale(.982)}to{opacity:1;transform:translateX(0) scale(1)}}
-@keyframes pushOut{from{opacity:1;transform:translateX(0) scale(1)}to{opacity:.22;transform:translateX(-16px) scale(.988)}}
-.endings-backdrop{position:fixed;inset:0;background:rgba(17,17,17,.18);backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:18px;z-index:50}
-.endings-backdrop.open{display:flex}
-.endings-modal{width:min(820px,100%);max-height:80vh;overflow:auto;background:#fff;border-radius:28px;border:1px solid rgba(17,17,17,.08);box-shadow:0 24px 60px rgba(17,17,17,.14);padding:18px}
-.sheet-title{font-size:20px;font-weight:800;margin:0 0 6px 0}
-.sheet-sub{font-size:13px;color:var(--muted);margin-bottom:14px}
+.choice.single{background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;box-shadow:0 10px 0 rgba(63,119,109,.22),0 18px 24px rgba(17,17,17,.08)}
+.choice.blocked{background:linear-gradient(180deg,#dc6a6a,#bf4d4d)!important;color:#fff!important}
+.overlay{position:fixed;inset:0;background:rgba(17,17,17,.18);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px;z-index:50;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease,visibility .18s ease}
+.overlay.open{opacity:1;visibility:visible;pointer-events:auto}
+.panel{width:min(820px,100%);max-height:80vh;overflow:auto;background:#fff;border-radius:28px;border:1px solid rgba(17,17,17,.08);box-shadow:0 24px 60px rgba(17,17,17,.14);padding:18px;transform:translateY(14px) scale(.986);transition:transform .18s ease,opacity .18s ease}
+.overlay.open .panel{transform:none}
+.sheet-title{font-size:20px;font-weight:800;margin:0 0 10px 0}
+.inventory-list{display:flex;flex-direction:column;gap:10px}
+.inventory-row{padding:13px 15px;border:1px solid rgba(17,17,17,.08);border-radius:16px;background:#fafaf8;display:flex;flex-direction:column;gap:4px;word-break:break-word}
+.inventory-line{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;font-size:14px;line-height:1.6;font-weight:700}
+.inventory-name{min-width:0;flex:1 1 auto}
+.inventory-qty{flex:0 0 auto;white-space:nowrap}
+.inventory-note{font-size:12px;line-height:1.55;color:var(--muted)}
+.inventory-empty{padding:13px 15px;border:1px dashed rgba(17,17,17,.12);border-radius:16px;background:#fafaf8;color:var(--muted)}
+.slot-picker-list{display:flex;flex-direction:column;gap:10px;max-height:38vh;overflow:auto}
+.slot-picker-item{padding:10px 12px;border:1px solid rgba(17,17,17,.08);border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px;line-height:1.5;font-weight:700;box-shadow:0 10px 18px rgba(17,17,17,.05);cursor:pointer}
+.slot-picker-item.active{background:var(--accent-soft);border-color:rgba(84,150,136,.34);color:var(--accent)}
+.slot-picker-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.slot-picker-total{font-size:12px;color:var(--muted);font-weight:700}
+.slot-picker-stepper{display:inline-flex;align-items:center;gap:6px;padding:4px 6px;border-radius:14px;border:1px solid rgba(17,17,17,.08);background:#fff;box-shadow:0 8px 16px rgba(17,17,17,.04)}
+.qty-btn{width:32px;height:32px;border-radius:10px;border:1px solid rgba(17,17,17,.08);background:#fff;box-shadow:0 6px 12px rgba(17,17,17,.05)}
+.qty-btn:disabled{opacity:.4;cursor:not-allowed}
+.qty-val{min-width:22px;text-align:center;font-size:15px;font-weight:800}
+.slot-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:16px}
+.slot-action{min-height:42px;border-radius:14px;border:1px solid rgba(17,17,17,.08);background:#fff;font-weight:800;box-shadow:0 10px 18px rgba(17,17,17,.06)}
+.slot-action.primary{background:linear-gradient(180deg,var(--accent),var(--accent-dark));color:#fff;border:0;box-shadow:0 10px 18px rgba(84,150,136,.22)}
+.slot-action.warn{color:var(--danger)}
 .gallery-section + .gallery-section{margin-top:18px}
 .gallery-heading{font-size:14px;font-weight:800;margin-bottom:10px}
 .gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
@@ -2917,39 +3444,59 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
 .ending-title{font-size:16px;font-weight:800;line-height:1.35;word-break:break-word;margin-bottom:10px}
 .ending-text{font-size:13px;line-height:1.75;color:#444;white-space:pre-wrap;word-break:break-word}
 .empty-gallery{border:1px dashed rgba(17,17,17,.12);border-radius:18px;padding:14px 16px;color:var(--muted);font-size:13px;background:#fafaf8}
-.empty-gallery.done{text-align:center}
-@media (max-width:720px){.main{padding:14px}.scene-card{height:calc(100vh - 180px)}.scene-title{font-size:22px}.scene-text{font-size:15px}.scene-actions{padding:12px 16px 16px 16px}.scene-head{padding:16px 16px 0 16px}.scene-text{padding:12px 16px 8px 16px}.locked-gallery{gap:10px}}
+.all-unlocked-note{grid-column:1/-1;padding-top:2px;color:var(--muted);font-size:13px}
+@media (max-width:720px){.main{padding:14px}.scene-card{min-height:calc(100vh - 180px)}.scene-title{font-size:22px}.scene-head{padding:16px 16px 0 16px}.scene-text{padding:12px 16px 4px 16px}.reward-note{padding:0 16px 10px 16px}.slot-strip{padding:0 16px 12px 16px}.scene-actions{padding:12px 16px 16px 16px}.locked-gallery{gap:10px}.slot-tile{width:54px;height:54px;border-radius:16px}}
 </style>
 </head>
 <body>
 <div class="app">
   <div class="topbar">
     <div class="brand">
-      <div class="mark">B</div>
-      <div><div class="brand-title">${safeTitle}</div><div class="brand-sub">文字游戏</div></div>
+      <div class="mark">C</div>
+      <div><div class="brand-title">Cuckoo</div><div class="brand-sub">分支文游编辑器</div></div>
     </div>
     <div class="top-actions">
+      <button class="icon-btn" id="bagBtn" title="背包"><svg viewBox="0 0 24 24" fill="none"><path d="M7 9V7A5 5 0 0 1 17 7V9" stroke="currentColor" stroke-width="2"/><path d="M6 9H18L17 20H7L6 9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></button>
       <button class="icon-btn" id="galleryBtn" title="结局图鉴"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="5" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="13" y="5" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="5" y="13" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/><rect x="13" y="13" width="6" height="6" rx="1.8" stroke="currentColor" stroke-width="2"/></svg></button>
       <button class="icon-btn" id="restartBtn" title="重新开始"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12A9 9 0 0 1 17.6 5.2" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M17 2V6H13" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 12A9 9 0 0 1 6.4 18.8" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M7 22V18H11" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
   <div class="main">
     <div class="frame">
-      <div class="scene-card stage-anim" id="sceneCard">
+      <div class="scene-card" id="sceneCard">
         <div class="scene-head">
           <div class="scene-title" id="sceneTitle"></div>
           <div class="scene-progress" id="progress"></div>
-          <div class="unlock-banner" id="unlockBanner">
-            <div class="unlock-pill">新解锁</div>
-          </div>
         </div>
         <div class="scene-text" id="sceneText"></div>
+        <div class="reward-note" id="rewardNote"></div>
+        <div class="slot-strip" id="slotStrip"></div>
         <div class="scene-actions" id="choices"></div>
       </div>
     </div>
   </div>
-  <div class="endings-backdrop" id="endingsBackdrop">
-    <div class="endings-modal">
+
+  <div class="overlay" id="inventoryOverlay">
+    <div class="panel">
+      <div class="sheet-title">背包</div>
+      <div class="inventory-list" id="inventoryList"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="slotOverlay">
+    <div class="panel">
+      <div class="sheet-title">放入卡槽</div>
+      <div class="slot-picker-list" id="slotPickerList"></div>
+      <div class="slot-actions">
+        <button class="slot-action" id="slotCloseBtn">关闭</button>
+        <button class="slot-action warn" id="slotTakeBackBtn">取回</button>
+        <button class="slot-action primary" id="slotPlaceBtn">放入</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="endingsOverlay">
+    <div class="panel">
       <div class="sheet-title">结局图鉴</div>
       <div class="gallery-section">
         <div class="gallery-heading" id="unlockedHeading">已解锁结局</div>
@@ -2962,30 +3509,287 @@ body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,
     </div>
   </div>
 </div>
+
 <script id="story-data" type="application/json">${storyJson}<\/script>
 <script id="ending-data" type="application/json">${endingsJson}<\/script>
 <script>
 const story = JSON.parse(document.getElementById('story-data').textContent);
 const allEndings = JSON.parse(document.getElementById('ending-data').textContent);
-const ENDING_KEY = 'ending-gallery-' + (story.name || 'story');
+const ENDING_KEY = 'cuckoo-ending-gallery-' + (story.id || 'story');
 let currentId = String(story.startId);
 let stepCount = 1;
 let unlocked = loadUnlocked();
-let isTransitioning = false;
+let inventory = {};
+let inventoryNotes = {};
+let claimedRewardNodes = {};
+let slotStateByNode = {};
+let activeSlotContext = null;
+const SLOT_BOX_ICON = '<svg viewBox="0 0 24 24" fill="none"><path d="M4.5 8.5L12 4L19.5 8.5L12 13L4.5 8.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M4.5 8.5V16L12 20L19.5 16V8.5" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 13V20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+let sceneSwitching = false;
+function loadUnlocked(){ try{ return JSON.parse(localStorage.getItem(ENDING_KEY) || '[]'); }catch(e){ return []; } }
+function saveUnlocked(){ localStorage.setItem(ENDING_KEY, JSON.stringify(unlocked)); }
 function getDisplayTitle(node){
   const enabled = node.titleEnabled !== false;
   const raw = (node.title || '').trim();
   if(!enabled) return '';
   return raw || ('独立节点' + node.id);
 }
+function escapeHtml(str=''){
+  return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function normalizeRewards(list){
+  return (Array.isArray(list) ? list : []).map(item => ({
+    item: String(item?.item || item?.name || '').trim(),
+    qty: Math.max(1, Number(item?.qty || item?.count || 1) || 1),
+    note: String(item?.note || item?.desc || '').trim().slice(0, 50)
+  })).filter(item => item.item);
+}
+function normalizeSlots(list){
+  return (Array.isArray(list) ? list : []).map(item => ({
+    item: String(item?.item || item?.name || '').trim(),
+    qty: Math.max(1, Number(item?.qty || item?.count || 1) || 1)
+  })).filter(item => item.item).slice(0, 6);
+}
 function getOutgoing(node){
   if(node.options && node.options.length){
-    return node.options.map((opt, idx) => ({label: opt.text || ('选项' + (idx + 1)), to: opt.nextId != null ? String(opt.nextId) : ''})).filter(x => x.to && story.nodes[x.to]);
+    return node.options.map((opt, idx) => ({label: opt.text || String(idx + 1), to: opt.nextId != null ? String(opt.nextId) : ''})).filter(x => x.to && story.nodes[x.to]);
   }
   return node.linearNext != null && story.nodes[String(node.linearNext)] ? [{label:'继续', to:String(node.linearNext)}] : [];
 }
-function loadUnlocked(){ try{ return JSON.parse(localStorage.getItem(ENDING_KEY) || '[]'); }catch(e){ return []; } }
-function saveUnlocked(){ localStorage.setItem(ENDING_KEY, JSON.stringify(unlocked)); }
+function addInventory(item, qty){
+  inventory[item] = (inventory[item] || 0) + qty;
+}
+function removeInventory(item, qty){
+  inventory[item] = Math.max(0, (inventory[item] || 0) - qty);
+  if(!inventory[item]) delete inventory[item];
+}
+function claimNodeRewards(node){
+  const rewards = normalizeRewards(node.rewards || []);
+  if(!rewards.length || claimedRewardNodes[node.id]) return '';
+  rewards.forEach(entry => {
+    addInventory(entry.item, entry.qty);
+    if(entry.note && !inventoryNotes[entry.item]) inventoryNotes[entry.item] = entry.note;
+  });
+  claimedRewardNodes[node.id] = true;
+  return rewards.map(entry => entry.item + '+' + entry.qty).join('，');
+}
+function ensureNodeSlotState(nodeId, node){
+  if(!slotStateByNode[nodeId]){
+    slotStateByNode[nodeId] = normalizeSlots(node.slots || []).map(() => null);
+  }
+  const needed = normalizeSlots(node.slots || []).length;
+  while(slotStateByNode[nodeId].length < needed) slotStateByNode[nodeId].push(null);
+  if(slotStateByNode[nodeId].length > needed) slotStateByNode[nodeId] = slotStateByNode[nodeId].slice(0, needed);
+  return slotStateByNode[nodeId];
+}
+function slotPlacementOk(node){
+  const required = normalizeSlots(node.slots || []);
+  if(!required.length) return true;
+  const placed = ensureNodeSlotState(node.id, node);
+  return required.every((req, idx) => {
+    const current = placed[idx];
+    return current && current.item === req.item && Number(current.qty || 0) >= req.qty;
+  });
+}
+function renderInventory(){
+  const list = document.getElementById('inventoryList');
+  const items = Object.keys(inventory).sort((a,b) => a.localeCompare(b, 'zh-Hans-CN'));
+  list.innerHTML = '';
+  if(!items.length){
+    list.innerHTML = '<div class="inventory-empty">背包还是空的。</div>';
+    return;
+  }
+  items.forEach(name => {
+    const row = document.createElement('div');
+    row.className = 'inventory-row';
+    row.innerHTML =
+      '<div class="inventory-line">' +
+        '<div class="inventory-name">' + escapeHtml(name) + '</div>' +
+        '<div class="inventory-qty">× ' + inventory[name] + '</div>' +
+      '</div>' +
+      (inventoryNotes[name] ? '<div class="inventory-note">' + escapeHtml(inventoryNotes[name]) + '</div>' : '');
+    list.appendChild(row);
+  });
+}
+function renderSlotStrip(node){
+  const strip = document.getElementById('slotStrip');
+  const required = normalizeSlots(node.slots || []);
+  strip.innerHTML = '';
+  if(!required.length){ strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  const placed = ensureNodeSlotState(node.id, node);
+  required.forEach((req, idx) => {
+    const current = placed[idx];
+    const tile = document.createElement('button');
+    tile.type = 'button';
+    tile.className = 'slot-tile' + (current ? ' filled' : '') + (current && current.item === req.item && current.qty >= req.qty ? ' correct' : '');
+    tile.innerHTML = '<div class="inner">' + SLOT_BOX_ICON + '</div>' + (current ? '<div class="qty">' + (current.qty > 1 ? current.qty : '') + '</div>' : '');
+    const openTile = (event) => {
+      if(event){
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      openSlotPicker(node, idx);
+    };
+    tile.addEventListener('click', openTile);
+    tile.addEventListener('touchend', openTile, {passive:false});
+    strip.appendChild(tile);
+  });
+}
+function openInventory(){ renderInventory(); document.getElementById('inventoryOverlay').classList.add('open'); }
+function closeOverlay(id){ document.getElementById(id).classList.remove('open'); }
+function beginSceneSwap(applyChange){
+  if(sceneSwitching) return;
+  sceneSwitching = true;
+  const card = document.getElementById('sceneCard');
+  card.classList.add('scene-swap-out');
+  setTimeout(() => {
+    applyChange();
+    render();
+    card.classList.remove('scene-swap-out');
+    card.classList.add('scene-swap-in');
+    setTimeout(() => {
+      card.classList.remove('scene-swap-in');
+      sceneSwitching = false;
+    }, 240);
+  }, 150);
+}
+function queueChoiceAdvance(button, applyChange){
+  if(sceneSwitching) return;
+  button.classList.add('pressed');
+  button.disabled = true;
+  setTimeout(() => {
+    beginSceneSwap(applyChange);
+  }, 120);
+}
+function updateSlotOverlayButtons(){
+  const placeBtn = document.getElementById('slotPlaceBtn');
+  const backBtn = document.getElementById('slotTakeBackBtn');
+  if(!placeBtn || !backBtn) return;
+  const node = activeSlotContext ? story.nodes[activeSlotContext.nodeId] : null;
+  const placed = node && activeSlotContext ? ensureNodeSlotState(node.id, node)[activeSlotContext.slotIndex] : null;
+  const canPlace = !!(activeSlotContext && activeSlotContext.selectedItem && (inventory[activeSlotContext.selectedItem] || 0) >= Math.max(1, activeSlotContext.qty || 1));
+  placeBtn.disabled = !canPlace;
+  backBtn.disabled = !placed;
+}
+
+function openSlotPicker(node, slotIndex){
+  const placed = ensureNodeSlotState(node.id, node)[slotIndex];
+  const items = Object.keys(inventory).filter(name => inventory[name] > 0).sort((a,b) => a.localeCompare(b, 'zh-Hans-CN'));
+  activeSlotContext = {
+    nodeId: node.id,
+    slotIndex,
+    selectedItem: placed?.item || items[0] || '',
+    qty: Math.max(1, placed?.qty || 1)
+  };
+  if(activeSlotContext.selectedItem){
+    const max = Math.max(1, inventory[activeSlotContext.selectedItem] || activeSlotContext.qty || 1);
+    activeSlotContext.qty = Math.min(activeSlotContext.qty, max);
+  }
+  renderSlotPicker();
+  updateSlotOverlayButtons();
+  document.getElementById('slotOverlay').classList.add('open');
+}
+
+function renderSlotPicker(){
+  const list = document.getElementById('slotPickerList');
+  const items = Object.keys(inventory).filter(name => inventory[name] > 0).sort((a,b) => a.localeCompare(b, 'zh-Hans-CN'));
+  list.innerHTML = '';
+  if(!items.length){
+    list.innerHTML = '<div class="inventory-empty">背包里没有可放入的物品。</div>';
+    activeSlotContext.selectedItem = '';
+    updateSlotOverlayButtons();
+    return;
+  }
+  if(!activeSlotContext.selectedItem || !items.includes(activeSlotContext.selectedItem)) activeSlotContext.selectedItem = items[0];
+  items.forEach(name => {
+    const total = Math.max(0, inventory[name] || 0);
+    const isActive = name === activeSlotContext.selectedItem;
+    const qty = isActive ? Math.max(1, Math.min(activeSlotContext.qty || 1, total || 1)) : 1;
+    if(isActive) activeSlotContext.qty = qty;
+    const row = document.createElement('div');
+    row.className = 'slot-picker-item' + (isActive ? ' active' : '');
+    row.innerHTML =
+      '<div class="slot-picker-main">' +
+        '<div>' + escapeHtml(name) + '</div>' +
+        '<div class="slot-picker-total">总数 ' + total + '</div>' +
+      '</div>' +
+      '<div class="slot-picker-stepper">' +
+        '<button class="qty-btn" type="button" data-pick-dec="' + escapeHtml(name) + '" ' + (isActive ? '' : 'disabled') + '>－</button>' +
+        '<div class="qty-val">' + (isActive ? qty : '-') + '</div>' +
+        '<button class="qty-btn" type="button" data-pick-inc="' + escapeHtml(name) + '" ' + (isActive && qty < total ? '' : 'disabled') + '>＋</button>' +
+      '</div>';
+    row.addEventListener('click', (e) => {
+      if(e.target.closest('.qty-btn')) return;
+      activeSlotContext.selectedItem = name;
+      activeSlotContext.qty = Math.max(1, Math.min(activeSlotContext.qty || 1, total || 1));
+      renderSlotPicker();
+    });
+    list.appendChild(row);
+  });
+  list.querySelectorAll('[data-pick-dec]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = btn.dataset.pickDec;
+    if(activeSlotContext.selectedItem !== name) return;
+    activeSlotContext.qty = Math.max(1, (activeSlotContext.qty || 1) - 1);
+    renderSlotPicker();
+  }));
+  list.querySelectorAll('[data-pick-inc]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = btn.dataset.pickInc;
+    if(activeSlotContext.selectedItem !== name) return;
+    const max = Math.max(1, inventory[name] || 1);
+    activeSlotContext.qty = Math.min(max, (activeSlotContext.qty || 1) + 1);
+    renderSlotPicker();
+  }));
+  updateSlotOverlayButtons();
+}
+
+function placeIntoSlot(){
+  if(!activeSlotContext || !activeSlotContext.selectedItem) return;
+  const available = inventory[activeSlotContext.selectedItem] || 0;
+  const qty = Math.max(1, activeSlotContext.qty || 1);
+  if(available < qty){
+    updateSlotOverlayButtons();
+    return;
+  }
+  const node = story.nodes[activeSlotContext.nodeId];
+  const slots = ensureNodeSlotState(node.id, node);
+  const placed = slots[activeSlotContext.slotIndex];
+  if(placed) addInventory(placed.item, placed.qty);
+  removeInventory(activeSlotContext.selectedItem, qty);
+  slots[activeSlotContext.slotIndex] = {
+    item: activeSlotContext.selectedItem,
+    qty
+  };
+  renderInventory();
+  closeOverlay('slotOverlay');
+  render();
+}
+
+function takeBackSlot(){
+  if(!activeSlotContext) return;
+  const node = story.nodes[activeSlotContext.nodeId];
+  const slots = ensureNodeSlotState(node.id, node);
+  const placed = slots[activeSlotContext.slotIndex];
+  if(placed){
+    addInventory(placed.item, placed.qty);
+    slots[activeSlotContext.slotIndex] = null;
+  }
+  renderInventory();
+  closeOverlay('slotOverlay');
+  render();
+}
+
+function flashBlocked(button){
+  const old = button.textContent;
+  button.textContent = '无法通过';
+  button.classList.add('blocked');
+  setTimeout(() => {
+    button.textContent = old;
+    button.classList.remove('blocked');
+  }, 850);
+}
 function renderGallery(){
   const unlockedWrap = document.getElementById('unlockedEndingGallery');
   const lockedWrap = document.getElementById('lockedEndingGallery');
@@ -3009,39 +3813,10 @@ function renderGallery(){
       lockedWrap.appendChild(card);
     }
   });
-  if(!unlockedCount){
-    unlockedWrap.innerHTML = '<div class="empty-gallery">尚未解锁任何结局。</div>';
-  }
-  if(!lockedCount){
-    lockedWrap.innerHTML = '<div class="all-unlocked-note">已解锁所有结局</div>';
-  }
+  if(!unlockedCount) unlockedWrap.innerHTML = '<div class="empty-gallery">尚未解锁任何结局。</div>';
+  if(!lockedCount) lockedWrap.innerHTML = '<div class="all-unlocked-note">已解锁所有结局</div>';
   document.getElementById('unlockedHeading').textContent = '已解锁结局 · ' + unlockedCount;
   document.getElementById('lockedHeading').textContent = '未解锁结局 · ' + lockedCount;
-}
-function animateCard(){
-  const card = document.getElementById('sceneCard');
-  card.classList.remove('leaving');
-  card.classList.remove('stage-anim');
-  void card.offsetWidth;
-  card.classList.add('stage-anim');
-}
-function setChoiceState(disabled){
-  document.querySelectorAll('#choices .choice').forEach(btn => { btn.disabled = disabled; });
-}
-function transitionTo(nextId){
-  if(isTransitioning) return;
-  isTransitioning = true;
-  setChoiceState(true);
-  const card = document.getElementById('sceneCard');
-  card.classList.remove('stage-anim');
-  card.classList.add('leaving');
-  setTimeout(() => {
-    currentId = String(nextId);
-    stepCount += 1;
-    card.classList.remove('leaving');
-    render();
-    isTransitioning = false;
-  }, 220);
 }
 function render(){
   const node = story.nodes[currentId];
@@ -3049,35 +3824,43 @@ function render(){
   const textEl = document.getElementById('sceneText');
   const progressEl = document.getElementById('progress');
   const wrap = document.getElementById('choices');
-  const unlockBanner = document.getElementById('unlockBanner');
+  const rewardEl = document.getElementById('rewardNote');
   wrap.innerHTML = '';
-  unlockBanner.classList.remove('show');
+  rewardEl.textContent = '';
   if(!node){
     titleEl.textContent = '无法找到起点';
     textEl.textContent = '故事数据异常。';
     progressEl.textContent = '';
+    document.getElementById('slotStrip').style.display = 'none';
     return;
   }
+  const gained = claimNodeRewards(node);
   const outs = getOutgoing(node);
-  let justUnlocked = false;
   if(node.kind === 'ending' && !unlocked.includes(String(node.id))){
     unlocked.push(String(node.id));
     saveUnlocked();
-    justUnlocked = true;
   }
   titleEl.textContent = getDisplayTitle(node);
   textEl.textContent = node.text || '（无内容）';
+  rewardEl.textContent = gained ? ('你获得了：' + gained + '，已放入背包。') : '';
   progressEl.textContent = '当前节点：' + node.id + ' · 已推进 ' + stepCount + ' 幕';
   document.getElementById('sceneCard').classList.toggle('ending', node.kind === 'ending');
-  if(justUnlocked){
-    unlockBanner.classList.add('show');
-  }
-  animateCard();
+  renderInventory();
+  renderSlotStrip(node);
   if(node.kind === 'ending'){
     const done = document.createElement('button');
-    done.className = 'choice';
-    done.textContent = '已抵达结局 · 重新开始';
-    done.onclick = restart;
+    done.className = 'choice single';
+    done.textContent = '重新开始';
+    done.onclick = () => queueChoiceAdvance(done, () => {
+      currentId = String(story.startId);
+      stepCount = 1;
+      inventory = {};
+      claimedRewardNodes = {};
+      slotStateByNode = {};
+      activeSlotContext = null;
+      closeOverlay('slotOverlay');
+      closeOverlay('inventoryOverlay');
+    });
     wrap.appendChild(done);
     renderGallery();
     return;
@@ -3086,30 +3869,73 @@ function render(){
     const btn = document.createElement('button');
     btn.className = 'choice' + (outs.length === 1 ? ' single' : '');
     btn.textContent = edge.label;
-    btn.onclick = () => { transitionTo(edge.to); };
+    btn.onclick = () => {
+      if(!slotPlacementOk(node)){
+        flashBlocked(btn);
+        return;
+      }
+      queueChoiceAdvance(btn, () => {
+        currentId = String(edge.to);
+        stepCount += 1;
+      });
+    };
     wrap.appendChild(btn);
   });
 }
-function restart(){ currentId = String(story.startId); stepCount = 1; render(); }
+function resetGameState(){
+  currentId = String(story.startId);
+  stepCount = 1;
+  inventory = {};
+  inventoryNotes = {};
+  claimedRewardNodes = {};
+  slotStateByNode = {};
+  activeSlotContext = null;
+  closeOverlay('slotOverlay');
+  closeOverlay('inventoryOverlay');
+}
+function restart(immediate=false){
+  if(immediate){
+    resetGameState();
+    render();
+    return;
+  }
+  if(sceneSwitching) return;
+  beginSceneSwap(() => {
+    resetGameState();
+  });
+}
 document.getElementById('restartBtn').addEventListener('click', restart);
+document.getElementById('bagBtn').addEventListener('click', openInventory);
 document.getElementById('galleryBtn').addEventListener('click', () => {
   renderGallery();
-  document.getElementById('endingsBackdrop').classList.add('open');
+  document.getElementById('endingsOverlay').classList.add('open');
 });
-document.getElementById('endingsBackdrop').addEventListener('click', (e) => {
-  if(e.target.id === 'endingsBackdrop') document.getElementById('endingsBackdrop').classList.remove('open');
+document.getElementById('inventoryOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'inventoryOverlay') closeOverlay('inventoryOverlay');
 });
+document.getElementById('slotOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'slotOverlay') closeOverlay('slotOverlay');
+});
+document.getElementById('endingsOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'endingsOverlay') closeOverlay('endingsOverlay');
+});
+document.getElementById('slotCloseBtn').addEventListener('click', () => closeOverlay('slotOverlay'));
+document.getElementById('slotTakeBackBtn').addEventListener('click', takeBackSlot);
+document.getElementById('slotPlaceBtn').addEventListener('click', placeIntoSlot);
+document.getElementById('slotCloseBtn').addEventListener('touchend', (e) => { e.preventDefault(); closeOverlay('slotOverlay'); }, {passive:false});
+document.getElementById('slotTakeBackBtn').addEventListener('touchend', (e) => { e.preventDefault(); takeBackSlot(); }, {passive:false});
+document.getElementById('slotPlaceBtn').addEventListener('touchend', (e) => { e.preventDefault(); placeIntoSlot(); }, {passive:false});
 render();
 <\/script>
 </body>
 </html>`;
-        download(`${sanitizeFilename(script.name || 'playable-story')}.html`, playable, 'text/html;charset=utf-8', true);
+        download(sanitizeFilename((script.name || 'Cuckoo')) + '.html', playable, 'text/html;charset=utf-8', true);
       }catch(err){
         alert('生成 HTML 失败：' + (err && err.message ? err.message : String(err)));
       }
     }
 
-        function download(filename, content, type='text/plain;charset=utf-8', notify=false){
+    function download(filename, content, type='text/plain;charset=utf-8', notify=false){
       const blob = new Blob([content], {type});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -3141,7 +3967,9 @@ render();
             x:n.x || 0, y:n.y || 0, linearNext:n.linearNext ? String(n.linearNext).replace(/[^\d]/g,'') : null,
             options:(n.options || []).map(o => ({text:o.text || '', nextId:o.nextId ? String(o.nextId).replace(/[^\d]/g,'') : null})),
             locked:!!n.locked,
-            titleEnabled: typeof n.titleEnabled === 'undefined' ? true : !!n.titleEnabled
+            titleEnabled: typeof n.titleEnabled === 'undefined' ? true : !!n.titleEnabled,
+            rewards: normalizeRewards(n.rewards || []),
+            slots: normalizeSlots(n.slots || [])
           };
         });
         parsed.nodes = convertedNodes;
@@ -3279,6 +4107,14 @@ render();
     });
 
     document.getElementById('modalNodeText').addEventListener('input', (e) => { document.getElementById('modalTextCount').textContent = `字数：${e.target.value.length}`; refreshAiUndoButton('modal'); });
+    document.getElementById('modalRewardsBtn').addEventListener('click', () => { openRewardEditModal(); });
+    document.getElementById('modalSlotsBtn').addEventListener('click', () => { openSlotEditModal(); });
+    document.getElementById('rewardAddBtn').addEventListener('click', () => { addRewardDraftRow(); });
+    document.getElementById('rewardCancel').addEventListener('click', () => { openNodeEditModal(); });
+    document.getElementById('rewardSave').addEventListener('click', () => { saveRewardConfig(); });
+    document.getElementById('slotAddBtn').addEventListener('click', () => { addSlotDraftRow(); });
+    document.getElementById('slotCancel').addEventListener('click', () => { openNodeEditModal(); });
+    document.getElementById('slotSave').addEventListener('click', () => { saveSlotConfig(); });
     document.getElementById('modalClearTitle').addEventListener('click', () => {
       const node = getSelectedNode();
       if(!node) return;
@@ -3299,6 +4135,8 @@ render();
       node.kind = document.getElementById('modalNodeKind').value;
       node.x = Number(document.getElementById('modalPosX').value) || 0;
       node.y = Number(document.getElementById('modalPosY').value) || 0;
+      node.rewards = normalizeRewards(node.rewards || []);
+      node.slots = normalizeSlots(node.slots || []);
       if(node.kind === 'ending'){ node.linearNext = null; node.options = []; }
       markDirty(); closeModal(); renderEditor();
     });
@@ -3438,6 +4276,8 @@ render();
     switchPage('home');
     renderHome();
   </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"df358ff767b04bcd8e3e7d3b1f6f5c6e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"7939e04a4baf43c8b86a560f74aac60e","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
